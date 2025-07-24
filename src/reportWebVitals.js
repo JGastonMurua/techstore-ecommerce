@@ -1,13 +1,6 @@
-const reportWebVitals = onPerfEntry => {
-  if (onPerfEntry && onPerfEntry instanceof Function) {
-    import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-      getCLS(onPerfEntry);
-      getFID(onPerfEntry);
-      getFCP(onPerfEntry);
-      getLCP(onPerfEntry);
-      getTTFB(onPerfEntry);
-    });
-  }
+// Función simplificada para evitar errores si web-vitals no está instalado
+const reportWebVitals = (onPerfEntry) => {
+  // Función vacía por ahora - se puede implementar después
 };
 
 export default reportWebVitals;
