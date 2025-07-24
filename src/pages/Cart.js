@@ -103,7 +103,7 @@ function Cart() {
       
       // Redirigir después de 1 segundo
       setTimeout(() => {
-        window.location.href = demoURL;
+        window.location.href = 'https://www.mercadopago.com.ar/';
       }, 1000);
 
     } catch (error) {
