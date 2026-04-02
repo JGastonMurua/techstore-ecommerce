@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Card, Button, Image, Alert, Badge, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Button, Spinner } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
-import { FaTrash, FaPlus, FaMinus, FaShoppingBag, FaArrowLeft, FaCreditCard } from 'react-icons/fa';
+import { FaTrash, FaPlus, FaMinus, FaShoppingBag, FaArrowLeft, FaCreditCard, FaLock, FaTruck, FaUndo } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
 import { useProducts } from '../context/ProductContext';
 import { toast } from 'react-toastify';
 
 function Cart() {
-  const { 
-    cartItems, 
-    removeFromCart, 
-    updateQuantity, 
-    incrementQuantity, 
-    decrementQuantity, 
-    clearCart, 
-    getTotalItems, 
-    getTotalPrice 
+  const {
+    cartItems,
+    removeFromCart,
+    updateQuantity,
+    incrementQuantity,
+    decrementQuantity,
+    clearCart,
+    getTotalItems,
+    getTotalPrice
   } = useCart();
 
   const { loadProducts } = useProducts();
@@ -23,33 +23,26 @@ function Cart() {
 
   const totalItems = getTotalItems();
   const totalPrice = getTotalPrice();
+  const shippingCost = totalPrice > 50000 ? 0 : 5000;
+  const finalTotal = totalPrice + shippingCost;
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
-      currency: 'ARS'
+      currency: 'ARS',
+      maximumFractionDigits: 0
     }).format(price);
   };
 
-  const handleQuantityChange = (productId, newQuantity) => {
-    if (newQuantity < 1) {
-      removeFromCart(productId);
-    } else {
-      updateQuantity(productId, newQuantity);
-    }
-  };
-
-  // Función para procesar el pago (VERSIÓN SIMPLE)
   const handleProceedToPayment = async () => {
     if (cartItems.length === 0) {
-      toast.error('El carrito está vacío');
+      toast.error('El carrito esta vacio');
       return;
     }
 
     setProcessingPayment(true);
 
     try {
-      // 1. Verificar stock antes del pago
       const stockErrors = [];
       for (const item of cartItems) {
         if (item.quantity > (item.stock || 0)) {
@@ -63,271 +56,221 @@ function Cart() {
         return;
       }
 
-      // 2. Descontar stock de la base de datos
       const { productAPI } = await import('../services/api');
-      
+
       for (const item of cartItems) {
         try {
-          // Obtener producto actual
           const productResponse = await productAPI.getById(item.id);
           const currentProduct = productResponse.data;
-          
-          // Calcular nuevo stock
           const currentStock = Number(currentProduct.stock) || 0;
           const newStock = Math.max(0, currentStock - item.quantity);
-          
-          // Actualizar stock en la base de datos
-          await productAPI.update(item.id, {
-            ...currentProduct,
-            stock: newStock
-          });
-          
-          console.log(`Stock actualizado: ${item.nombre} ${currentStock} -> ${newStock}`);
+          await productAPI.update(item.id, { ...currentProduct, stock: newStock });
         } catch (error) {
           console.error(`Error actualizando ${item.nombre}:`, error);
         }
       }
 
-      // 3. Limpiar carrito
       clearCart();
-      
-      // 4. Recargar productos para mostrar nuevo stock
       await loadProducts();
-      
-      // 5. Mostrar mensaje y redirigir a MercadoPago
       toast.success('Redirigiendo a MercadoPago...');
-      
-      // URL DIRECTA DE MERCADOPAGO 
-      const mercadoPagoURL = 'https://www.mercadopago.com.ar/';
-      
-      
-      // Redirigir después de 1 segundo
+
       setTimeout(() => {
         window.location.href = 'https://www.mercadopago.com.ar/';
       }, 1000);
 
     } catch (error) {
       console.error('Error procesando pago:', error);
-      toast.error('Error al procesar el pago. Inténtalo de nuevo.');
+      toast.error('Error al procesar el pago. Intentalo de nuevo.');
     } finally {
       setProcessingPayment(false);
     }
   };
 
+  // Carrito vacio
   if (cartItems.length === 0) {
     return (
       <Container className="py-5">
-        <Row className="justify-content-center">
-          <Col md={6} className="text-center">
-            <div className="mb-4" style={{ fontSize: '5rem', opacity: 0.3 }}>
-              🛒
-            </div>
-            <h2 className="mb-3">Tu carrito está vacío</h2>
-            <p className="text-muted mb-4">
-              ¡Agrega algunos productos increíbles a tu carrito!
-            </p>
-            <LinkContainer to="/productos">
-              <Button variant="primary" size="lg">
-                <FaShoppingBag className="me-2" />
-                Explorar Productos
-              </Button>
-            </LinkContainer>
-          </Col>
-        </Row>
+        <div className="cart-empty">
+          <FaShoppingBag size={64} className="mb-3" style={{ color: '#E0D4F0' }} />
+          <h4 className="mb-2">Tu carrito esta vacio</h4>
+          <p className="mb-4" style={{ color: '#666' }}>
+            Agrega productos para comenzar tu compra
+          </p>
+          <LinkContainer to="/productos">
+            <Button style={{ backgroundColor: 'var(--ts-primary)', border: 'none', fontWeight: 600 }}>
+              <FaShoppingBag className="me-2" />
+              Ver productos
+            </Button>
+          </LinkContainer>
+        </div>
       </Container>
     );
   }
 
   return (
-    <div>
-      <div className="bg-light py-4">
-        <Container>
-          <Row>
-            <Col>
-              <h1 className="display-6 fw-bold mb-1">
-                Carrito de Compras
-              </h1>
-              <p className="text-muted mb-0">
-                Revisa y confirma tu pedido
-              </p>
-            </Col>
-          </Row>
-        </Container>
-      </div>
+    <div className="cart-page">
+      <Container>
 
-      <Container className="py-4">
-        <Row>
-          {/* Botón volver */}
-          <Col>
-            <LinkContainer to="/productos">
-              <Button variant="outline-secondary" className="mb-4">
-                <FaArrowLeft className="me-2" />
-                Seguir Comprando
-              </Button>
-            </LinkContainer>
-          </Col>
-        </Row>
+        {/* Titulo y volver */}
+        <div className="d-flex align-items-center gap-3 mb-3">
+          <LinkContainer to="/productos">
+            <Button variant="link" className="p-0 text-decoration-none" style={{ color: 'var(--ts-primary)' }}>
+              <FaArrowLeft className="me-1" size={13} />
+              Seguir comprando
+            </Button>
+          </LinkContainer>
+        </div>
 
-        <Row>
-          {/* Lista de productos */}
+        <h1 className="cart-title">
+          Carrito ({totalItems} {totalItems === 1 ? 'producto' : 'productos'})
+        </h1>
+
+        <Row className="g-3">
+
+          {/* Columna izquierda - lista de items */}
           <Col lg={8}>
-            <Card>
-              <Card.Header className="d-flex justify-content-between align-items-center">
-                <h5 className="mb-0">
-                  Productos ({totalItems} {totalItems === 1 ? 'item' : 'items'})
-                </h5>
-                <Button 
-                  variant="outline-danger" 
-                  size="sm"
+            <div className="cart-items-card">
+
+              {/* Header */}
+              <div className="d-flex justify-content-between align-items-center px-4 py-3" style={{ borderBottom: '1px solid var(--ts-border)' }}>
+                <span style={{ fontWeight: 600, color: 'var(--ts-text)' }}>
+                  Productos
+                </span>
+                <button
                   onClick={clearCart}
+                  style={{ background: 'none', border: 'none', color: 'var(--ts-text-muted)', fontSize: '0.85rem', cursor: 'pointer' }}
                 >
-                  <FaTrash className="me-1" />
-                  Vaciar Carrito
-                </Button>
-              </Card.Header>
-              <Card.Body className="p-0">
-                {cartItems.map(item => (
-                  <div key={item.id} className="cart-item p-3">
-                    <Row className="align-items-center">
-                      {/* Imagen del producto */}
-                      <Col xs={3} md={2}>
-                        <Image
-                          src={item.imagen || 'https://via.placeholder.com/100x100?text=Sin+Imagen'}
-                          alt={item.nombre}
-                          rounded
-                          fluid
-                          style={{ maxHeight: '80px', objectFit: 'cover' }}
-                        />
-                      </Col>
+                  <FaTrash className="me-1" size={12} />
+                  Vaciar carrito
+                </button>
+              </div>
 
-                      {/* Información del producto */}
-                      <Col xs={9} md={4}>
-                        <h6 className="mb-1">{item.nombre}</h6>
-                        <small className="text-muted d-block">
-                          {item.categoria && (
-                            <Badge bg="secondary" className="me-2">
-                              {item.categoria}
-                            </Badge>
-                          )}
-                          {item.marca}
-                        </small>
-                        <div className="text-primary fw-bold">
-                          {formatPrice(item.precio)}
-                        </div>
-                      </Col>
+              {/* Items */}
+              {cartItems.map(item => (
+                <div key={item.id} className="cart-item">
 
-                      {/* Controles de cantidad */}
-                      <Col xs={12} md={3} className="mt-2 mt-md-0">
-                        <div className="d-flex align-items-center justify-content-center">
-                          <Button
-                            variant="outline-secondary"
-                            size="sm"
-                            onClick={() => decrementQuantity(item.id)}
-                            disabled={item.quantity <= 1}
-                          >
-                            <FaMinus />
-                          </Button>
-                          <span className="mx-3 fw-bold">
-                            {item.quantity}
-                          </span>
-                          <Button
-                            variant="outline-secondary"
-                            size="sm"
-                            onClick={() => incrementQuantity(item.id)}
-                          >
-                            <FaPlus />
-                          </Button>
-                        </div>
-                      </Col>
+                  {/* Imagen */}
+                  <img
+                    src={item.imagen || 'https://via.placeholder.com/80x80?text=Sin+Imagen'}
+                    alt={item.nombre}
+                    className="cart-item-image"
+                  />
 
-                      {/* Subtotal y eliminar */}
-                      <Col xs={12} md={3} className="text-center text-md-end mt-2 mt-md-0">
-                        <div className="fw-bold text-primary mb-2">
-                          {formatPrice(item.precio * item.quantity)}
-                        </div>
-                        <Button
-                          variant="outline-danger"
-                          size="sm"
-                          onClick={() => removeFromCart(item.id)}
-                        >
-                          <FaTrash />
-                        </Button>
-                      </Col>
-                    </Row>
-                  </div>
-                ))}
-              </Card.Body>
-            </Card>
-          </Col>
-
-          {/* Resumen del pedido */}
-          <Col lg={4}>
-            <Card className="sticky-top" style={{ top: '20px' }}>
-              <Card.Header>
-                <h5 className="mb-0">Resumen del Pedido</h5>
-              </Card.Header>
-              <Card.Body>
-                <div className="d-flex justify-content-between mb-2">
-                  <span>Subtotal ({totalItems} {totalItems === 1 ? 'producto' : 'productos'}):</span>
-                  <span>{formatPrice(totalPrice)}</span>
-                </div>
-                <div className="d-flex justify-content-between mb-2">
-                  <span>Envío:</span>
-                  <span className="text-success">
-                    {totalPrice > 50000 ? 'GRATIS' : formatPrice(5000)}
-                  </span>
-                </div>
-                <hr />
-                <div className="d-flex justify-content-between mb-3">
-                  <strong>Total:</strong>
-                  <strong className="text-primary">
-                    {formatPrice(totalPrice > 50000 ? totalPrice : totalPrice + 5000)}
-                  </strong>
-                </div>
-
-                {totalPrice <= 50000 && (
-                  <Alert variant="info" className="small mb-3">
-                    💡 Agrega {formatPrice(50000 - totalPrice)} más para envío gratuito
-                  </Alert>
-                )}
-
-                <div className="d-grid gap-2">
-                  <Button 
-                    variant="primary" 
-                    size="lg"
-                    onClick={handleProceedToPayment}
-                    disabled={processingPayment || totalItems === 0}
-                  >
-                    {processingPayment ? (
-                      <>
-                        <Spinner animation="border" size="sm" className="me-2" />
-                        Procesando...
-                      </>
-                    ) : (
-                      <>
-                        <FaCreditCard className="me-2" />
-                        Proceder al Pago
-                      </>
+                  {/* Info */}
+                  <div className="cart-item-info">
+                    <div className="cart-item-name">{item.nombre}</div>
+                    {item.marca && (
+                      <small style={{ color: 'var(--ts-text-muted)' }}>{item.marca}</small>
                     )}
-                  </Button>
-                  <LinkContainer to="/productos">
-                    <Button variant="outline-secondary" disabled={processingPayment}>
-                      Continuar Comprando
-                    </Button>
-                  </LinkContainer>
-                </div>
 
-                {/* Información adicional */}
-                <div className="mt-3 text-center">
-                  <small className="text-muted">
-                    🔒 Compra 100% segura<br />
-                    📦 Envío en 24-48hs<br />
-                    🔄 30 días para devoluciones
-                  </small>
+                    {/* Controles de cantidad */}
+                    <div className="cart-item-actions">
+                      <button
+                        className="cart-qty-btn"
+                        onClick={() => item.quantity <= 1 ? removeFromCart(item.id) : decrementQuantity(item.id)}
+                      >
+                        <FaMinus size={10} />
+                      </button>
+                      <span className="cart-qty-number">{item.quantity}</span>
+                      <button
+                        className="cart-qty-btn"
+                        onClick={() => incrementQuantity(item.id)}
+                      >
+                        <FaPlus size={10} />
+                      </button>
+                      <button
+                        className="cart-item-delete"
+                        onClick={() => removeFromCart(item.id)}
+                      >
+                        <FaTrash size={11} className="me-1" />
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Precio */}
+                  <div className="cart-item-price">
+                    {formatPrice(item.precio * item.quantity)}
+                    {item.quantity > 1 && (
+                      <div style={{ fontSize: '0.78rem', color: 'var(--ts-text-muted)', fontWeight: 400 }}>
+                        {formatPrice(item.precio)} c/u
+                      </div>
+                    )}
+                  </div>
+
                 </div>
-              </Card.Body>
-            </Card>
+              ))}
+            </div>
           </Col>
+
+          {/* Columna derecha - resumen */}
+          <Col lg={4}>
+            <div className="cart-summary-card">
+
+              <div className="cart-summary-title">Resumen de compra</div>
+
+              <div className="cart-summary-row">
+                <span>Productos ({totalItems})</span>
+                <span>{formatPrice(totalPrice)}</span>
+              </div>
+
+              <div className="cart-summary-row">
+                <span>Envio</span>
+                {shippingCost === 0 ? (
+                  <span className="cart-summary-shipping">Gratis</span>
+                ) : (
+                  <span>{formatPrice(shippingCost)}</span>
+                )}
+              </div>
+
+              {shippingCost > 0 && (
+                <div style={{ fontSize: '0.8rem', color: 'var(--ts-success)', marginBottom: '0.5rem' }}>
+                  Agrega {formatPrice(50000 - totalPrice)} mas para envio gratis
+                </div>
+              )}
+
+              <div className="cart-summary-row total">
+                <span>Total</span>
+                <span>{formatPrice(finalTotal)}</span>
+              </div>
+
+              <button
+                className="btn-checkout"
+                onClick={handleProceedToPayment}
+                disabled={processingPayment}
+              >
+                {processingPayment ? (
+                  <>
+                    <Spinner animation="border" size="sm" className="me-2" />
+                    Procesando...
+                  </>
+                ) : (
+                  <>
+                    <FaCreditCard className="me-2" />
+                    Continuar compra
+                  </>
+                )}
+              </button>
+
+              {/* Garantias */}
+              <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--ts-border)' }}>
+                <div className="d-flex align-items-center gap-2 mb-2" style={{ fontSize: '0.82rem', color: 'var(--ts-text-muted)' }}>
+                  <FaLock size={12} style={{ color: 'var(--ts-success)' }} />
+                  Compra 100% segura
+                </div>
+                <div className="d-flex align-items-center gap-2 mb-2" style={{ fontSize: '0.82rem', color: 'var(--ts-text-muted)' }}>
+                  <FaTruck size={12} style={{ color: 'var(--ts-success)' }} />
+                  Envio en 24-48hs
+                </div>
+                <div className="d-flex align-items-center gap-2" style={{ fontSize: '0.82rem', color: 'var(--ts-text-muted)' }}>
+                  <FaUndo size={12} style={{ color: 'var(--ts-success)' }} />
+                  30 dias para devoluciones
+                </div>
+              </div>
+
+            </div>
+          </Col>
+
         </Row>
       </Container>
     </div>

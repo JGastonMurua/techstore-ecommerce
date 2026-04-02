@@ -11,8 +11,10 @@ import { CartProvider } from './context/CartContext';
 import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute';
 
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Home from './pages/Home';
 import Products from './pages/Products';
+import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
@@ -32,6 +34,7 @@ function App() {
                   {/* Rutas públicas */}
                   <Route path="/" element={<Home />} />
                   <Route path="/productos" element={<Products />} />
+                  <Route path="/producto/:id" element={<ProductDetail />} />
                   <Route path="/carrito" element={<Cart />} />
                   
                   {/* Rutas de autenticación */}
@@ -74,6 +77,7 @@ function App() {
                 </Routes>
               </main>
               
+              <Footer />
               <ToastContainer
                 position="bottom-right"
                 autoClose={3000}
