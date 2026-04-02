@@ -1,30 +1,40 @@
 /* ============================
-   TECHSTORE - TEMA PURPLE
-   Inspirado en la UX de MercadoLibre
+   TECHSTORE — PALETA OPCION 1
+   Purple + Blanco + Teal
+   Inspirado en layout eBay
    ============================= */
 
 :root {
-  --ts-primary:      #5C2D91;
-  --ts-primary-dark: #3D1A6E;
-  --ts-primary-light:#7B4BB8;
-  --ts-accent:       #FF6B35;
-  --ts-accent-hover: #E55A25;
-  --ts-bg:           #F0EBF8;
-  --ts-card-bg:      #FFFFFF;
-  --ts-border:       #E0D4F0;
-  --ts-text:         #333333;
-  --ts-text-muted:   #666666;
-  --ts-success:      #00A650;
-  --ts-danger:       #E53935;
+  --ts-purple:       #5C2D91;
+  --ts-purple-dark:  #3D1A6E;
+  --ts-purple-light: #7B4BB8;
+  --ts-teal:         #00897B;
+  --ts-teal-dark:    #00695C;
+  --ts-teal-light:   #4DB6AC;
+  --ts-bg:           #F5F5F5;
+  --ts-bg-white:     #FFFFFF;
+  --ts-border:       #E0E0E0;
+  --ts-border-light: #EEEEEE;
+  --ts-text:         #111111;
+  --ts-text-mid:     #444444;
+  --ts-text-muted:   #767676;
+  --ts-success:      #2E7D32;
+  --ts-danger:       #C62828;
+  --ts-warning-bg:   #FFF8E1;
+  --ts-warning-text: #F57F17;
 }
 
 /* ============================
    BASE
    ============================= */
+*, *::before, *::after { box-sizing: border-box; }
+
 body {
   background-color: var(--ts-bg);
   color: var(--ts-text);
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  margin: 0;
 }
 
 .App {
@@ -33,186 +43,229 @@ body {
   flex-direction: column;
 }
 
+a { color: var(--ts-purple); }
+a:hover { color: var(--ts-purple-dark); }
+
 /* ============================
-   NAVBAR - ESTILO MERCADOLIBRE
+   NAVBAR — ESTILO EBAY: BLANCO
    ============================= */
 .navbar-techstore {
-  background-color: var(--ts-primary) !important;
-  padding: 0.6rem 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  background-color: var(--ts-bg-white) !important;
+  border-bottom: 2px solid var(--ts-purple);
+  padding: 0.5rem 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
 .navbar-techstore .navbar-brand {
-  color: #fff !important;
-  font-weight: 700;
-  font-size: 1.4rem;
-  letter-spacing: -0.5px;
+  color: var(--ts-purple) !important;
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: -1px;
 }
 
 .navbar-techstore .nav-link {
-  color: rgba(255,255,255,0.9) !important;
+  color: var(--ts-text-mid) !important;
   font-weight: 500;
-  padding: 0.4rem 0.8rem !important;
-  border-radius: 6px;
-  transition: background 0.2s;
+  font-size: 0.88rem;
+  padding: 0.35rem 0.65rem !important;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
 }
 
 .navbar-techstore .nav-link:hover {
-  background: rgba(255,255,255,0.15);
-  color: #fff !important;
+  color: var(--ts-purple) !important;
+  background: rgba(92,45,145,0.07);
 }
 
-/* Barra de busqueda en navbar - estilo ML */
+/* Barra de busqueda — ocupa el centro, igual que eBay */
 .navbar-search {
   flex: 1;
-  max-width: 560px;
+  max-width: 580px;
   margin: 0 1.5rem;
 }
 
 .navbar-search .input-group {
-  border-radius: 8px;
+  border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  border: 2px solid var(--ts-purple);
 }
 
 .navbar-search input {
   border: none;
-  padding: 0.5rem 1rem;
-  font-size: 0.95rem;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.92rem;
+  outline: none;
+  box-shadow: none !important;
 }
 
 .navbar-search input:focus {
   box-shadow: none;
-  outline: none;
 }
 
 .navbar-search .btn-search {
-  background-color: var(--ts-primary-light);
+  background-color: var(--ts-purple);
   border: none;
   color: white;
-  padding: 0.5rem 1rem;
+  padding: 0 1rem;
+  font-size: 0.9rem;
   transition: background 0.2s;
 }
 
 .navbar-search .btn-search:hover {
-  background-color: var(--ts-primary-dark);
+  background-color: var(--ts-purple-dark);
 }
 
-/* Badge del carrito */
+/* Badge carrito */
 .cart-badge {
-  background-color: var(--ts-accent) !important;
-  font-size: 0.65rem !important;
+  background-color: var(--ts-teal) !important;
+  font-size: 0.62rem !important;
   font-weight: 700;
 }
 
 /* ============================
-   HERO SECTION
+   BARRA DE CATEGORIAS — EBAY STYLE
+   ============================= */
+.categories-bar {
+  background: var(--ts-bg-white);
+  border-bottom: 1px solid var(--ts-border-light);
+  padding: 0;
+}
+
+.categories-bar .inner {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.categories-bar .inner::-webkit-scrollbar { display: none; }
+
+.category-link {
+  color: var(--ts-text-mid);
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 0.55rem 1rem;
+  white-space: nowrap;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.15s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.category-link:hover,
+.category-link.active {
+  color: var(--ts-purple);
+  border-bottom-color: var(--ts-purple);
+  background: rgba(92,45,145,0.04);
+}
+
+/* ============================
+   HERO SECTION — MAS COMPACTO
    ============================= */
 .hero-section {
-  background: linear-gradient(135deg, var(--ts-primary) 0%, var(--ts-primary-light) 100%);
+  background: linear-gradient(120deg, var(--ts-purple) 0%, var(--ts-purple-light) 100%);
   color: white;
-  padding: 4rem 0;
+  padding: 2.5rem 0;
 }
 
 .hero-section h1 {
+  font-size: 1.9rem;
   font-weight: 800;
-  letter-spacing: -1px;
+  line-height: 1.2;
+  margin-bottom: 0.6rem;
 }
 
-.hero-section .btn-hero-primary {
-  background-color: var(--ts-accent);
+.hero-section p.lead {
+  font-size: 0.95rem;
+  opacity: 0.88;
+  margin-bottom: 1.25rem;
+}
+
+.btn-hero-primary {
+  background-color: var(--ts-teal);
   border: none;
   color: white;
-  font-weight: 600;
-  padding: 0.75rem 1.75rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: background 0.2s, transform 0.15s;
-}
-
-.hero-section .btn-hero-primary:hover {
-  background-color: var(--ts-accent-hover);
-  transform: translateY(-2px);
-}
-
-.hero-section .btn-hero-secondary {
-  background-color: transparent;
-  border: 2px solid rgba(255,255,255,0.7);
-  color: white;
-  font-weight: 600;
-  padding: 0.75rem 1.75rem;
-  border-radius: 8px;
-  transition: all 0.2s;
-}
-
-.hero-section .btn-hero-secondary:hover {
-  background-color: rgba(255,255,255,0.15);
-  border-color: white;
-}
-
-/* ============================
-   CATEGORIAS - SEGUNDA BARRA
-   ============================= */
-.categories-bar {
-  background: white;
-  border-bottom: 1px solid var(--ts-border);
-  padding: 0.5rem 0;
-}
-
-.category-btn {
-  background: none;
-  border: none;
-  color: var(--ts-text);
-  padding: 0.4rem 1rem;
-  border-radius: 20px;
+  font-weight: 700;
+  padding: 0.6rem 1.5rem;
+  border-radius: 6px;
   font-size: 0.9rem;
-  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-hero-primary:hover {
+  background-color: var(--ts-teal-dark);
+  transform: translateY(-1px);
+  color: white;
+}
+
+.btn-hero-secondary {
+  background: transparent;
+  border: 2px solid rgba(255,255,255,0.6);
+  color: white;
+  font-weight: 600;
+  padding: 0.6rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s;
-  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.category-btn:hover,
-.category-btn.active {
-  background-color: var(--ts-bg);
-  color: var(--ts-primary);
-  font-weight: 600;
+.btn-hero-secondary:hover {
+  border-color: white;
+  background: rgba(255,255,255,0.12);
+  color: white;
 }
 
 /* ============================
-   PRODUCT CARDS - ESTILO ML
+   PRODUCT CARDS — EBAY COMPACT
    ============================= */
 .product-card {
-  background: var(--ts-card-bg);
+  background: var(--ts-bg-white);
   border: 1px solid var(--ts-border);
-  border-radius: 10px;
-  transition: box-shadow 0.25s, transform 0.25s;
-  height: 100%;
+  border-radius: 8px;
+  transition: box-shadow 0.2s, transform 0.2s;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .product-card:hover {
-  box-shadow: 0 6px 24px rgba(92,45,145,0.15);
-  transform: translateY(-3px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  transform: translateY(-2px);
 }
 
+/* Imagen mas pequena — estilo eBay */
 .product-image {
-  height: 200px;
+  height: 160px;
   object-fit: contain;
-  padding: 1rem;
-  background: #fafafa;
+  padding: 0.75rem;
+  background: #FAFAFA;
+  width: 100%;
+  display: block;
 }
 
 .product-card .card-body {
-  padding: 1rem;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .product-card .product-name {
-  font-size: 0.95rem;
-  color: var(--ts-text);
+  font-size: 0.85rem;
+  color: var(--ts-text-mid);
   font-weight: 400;
-  line-height: 1.3;
-  margin-bottom: 0.5rem;
+  line-height: 1.35;
+  margin-bottom: 0.4rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -220,52 +273,61 @@ body {
 }
 
 .product-card .product-price {
-  font-size: 1.4rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   color: var(--ts-text);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
+  line-height: 1;
 }
 
 .product-card .product-installments {
-  font-size: 0.82rem;
+  font-size: 0.77rem;
   color: var(--ts-success);
   font-weight: 500;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.3rem;
 }
 
 .product-card .product-shipping {
-  font-size: 0.8rem;
+  font-size: 0.77rem;
   color: var(--ts-success);
   font-weight: 600;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.6rem;
 }
 
 .product-card .btn-add-cart {
   width: 100%;
-  background-color: var(--ts-primary);
+  background-color: var(--ts-teal);
   border: none;
   color: white;
   font-weight: 600;
-  padding: 0.5rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  cursor: pointer;
   transition: background 0.2s;
+  margin-top: auto;
 }
 
-.product-card .btn-add-cart:hover {
-  background-color: var(--ts-primary-dark);
+.product-card .btn-add-cart:hover:not(:disabled) {
+  background-color: var(--ts-teal-dark);
 }
 
-.product-card .badge-stock-low {
-  background-color: #FFF3CD;
-  color: #856404;
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+.product-card .btn-add-cart:disabled {
+  background-color: #BDBDBD;
+  cursor: not-allowed;
+}
+
+.badge-stock-low {
+  background: var(--ts-warning-bg);
+  color: var(--ts-warning-text);
+  font-size: 0.72rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 3px;
+  font-weight: 600;
 }
 
 /* ============================
-   CARRITO - ESTILO ML
+   CARRITO — EBAY/ML STYLE
    ============================= */
 .cart-page {
   background-color: var(--ts-bg);
@@ -274,15 +336,15 @@ body {
 }
 
 .cart-title {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 1.35rem;
+  font-weight: 700;
   color: var(--ts-text);
   margin-bottom: 1.25rem;
 }
 
 .cart-items-card {
-  background: white;
-  border-radius: 10px;
+  background: var(--ts-bg-white);
+  border-radius: 8px;
   border: 1px solid var(--ts-border);
   overflow: hidden;
 }
@@ -290,166 +352,158 @@ body {
 .cart-item {
   display: flex;
   align-items: center;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--ts-border);
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--ts-border-light);
   gap: 1rem;
 }
 
-.cart-item:last-child {
-  border-bottom: none;
-}
+.cart-item:last-child { border-bottom: none; }
 
 .cart-item-image {
-  width: 80px;
-  height: 80px;
+  width: 72px;
+  height: 72px;
   object-fit: contain;
   flex-shrink: 0;
-  background: #fafafa;
-  border-radius: 6px;
-  padding: 0.25rem;
+  background: #FAFAFA;
+  border-radius: 4px;
+  padding: 0.2rem;
+  border: 1px solid var(--ts-border-light);
 }
 
-.cart-item-info {
-  flex: 1;
-  min-width: 0;
-}
+.cart-item-info { flex: 1; min-width: 0; }
 
 .cart-item-name {
-  font-size: 0.95rem;
-  color: var(--ts-text);
-  margin-bottom: 0.25rem;
-  white-space: nowrap;
+  font-size: 0.9rem;
+  color: var(--ts-text-mid);
+  margin-bottom: 0.2rem;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cart-item-actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
 }
 
 .cart-qty-btn {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   border: 1px solid var(--ts-border);
-  background: white;
-  color: var(--ts-primary);
-  font-size: 1rem;
+  background: var(--ts-bg-white);
+  color: var(--ts-purple);
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.15s;
   padding: 0;
-  line-height: 1;
 }
 
 .cart-qty-btn:hover {
-  background: var(--ts-primary);
+  background: var(--ts-purple);
   color: white;
-  border-color: var(--ts-primary);
+  border-color: var(--ts-purple);
 }
 
 .cart-qty-number {
-  min-width: 28px;
+  min-width: 26px;
   text-align: center;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .cart-item-delete {
   background: none;
   border: none;
   color: var(--ts-text-muted);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   cursor: pointer;
   padding: 0;
   margin-left: 0.5rem;
   transition: color 0.15s;
 }
 
-.cart-item-delete:hover {
-  color: var(--ts-danger);
-}
+.cart-item-delete:hover { color: var(--ts-danger); }
 
 .cart-item-price {
-  font-size: 1.15rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
   color: var(--ts-text);
   text-align: right;
-  min-width: 110px;
+  min-width: 100px;
 }
 
-/* Resumen del carrito - columna derecha */
+/* Resumen */
 .cart-summary-card {
-  background: white;
-  border-radius: 10px;
+  background: var(--ts-bg-white);
+  border-radius: 8px;
   border: 1px solid var(--ts-border);
-  padding: 1.5rem;
+  padding: 1.25rem;
   position: sticky;
   top: 1.5rem;
 }
 
 .cart-summary-title {
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   margin-bottom: 1rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--ts-border);
+  border-bottom: 1px solid var(--ts-border-light);
 }
 
 .cart-summary-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.75rem;
-  font-size: 0.95rem;
-  color: var(--ts-text);
+  margin-bottom: 0.6rem;
+  font-size: 0.9rem;
 }
 
 .cart-summary-row.total {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 700;
   padding-top: 0.75rem;
-  border-top: 1px solid var(--ts-border);
+  border-top: 1px solid var(--ts-border-light);
   margin-top: 0.5rem;
 }
 
 .cart-summary-shipping {
   color: var(--ts-success);
   font-weight: 600;
-  font-size: 0.9rem;
 }
 
 .btn-checkout {
   width: 100%;
-  background-color: var(--ts-accent);
+  background-color: var(--ts-teal);
   border: none;
   color: white;
   font-weight: 700;
-  padding: 0.85rem;
-  border-radius: 8px;
-  font-size: 1rem;
+  padding: 0.8rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
   margin-top: 1rem;
+  cursor: pointer;
   transition: background 0.2s, transform 0.15s;
 }
 
-.btn-checkout:hover {
-  background-color: var(--ts-accent-hover);
+.btn-checkout:hover:not(:disabled) {
+  background-color: var(--ts-teal-dark);
   transform: translateY(-1px);
 }
 
 .btn-checkout:disabled {
-  background-color: #ccc;
-  transform: none;
+  background-color: #BDBDBD;
+  cursor: not-allowed;
 }
 
 .cart-empty {
-  background: white;
-  border-radius: 10px;
+  background: var(--ts-bg-white);
+  border-radius: 8px;
   border: 1px solid var(--ts-border);
   text-align: center;
   padding: 4rem 2rem;
@@ -457,33 +511,15 @@ body {
 }
 
 /* ============================
-   BOTONES GENERALES
-   ============================= */
-.btn-primary-ts {
-  background-color: var(--ts-primary);
-  border-color: var(--ts-primary);
-  color: white;
-  font-weight: 600;
-  border-radius: 8px;
-  transition: background 0.2s, transform 0.15s;
-}
-
-.btn-primary-ts:hover {
-  background-color: var(--ts-primary-dark);
-  border-color: var(--ts-primary-dark);
-  transform: translateY(-1px);
-}
-
-/* ============================
-   TITULOS DE SECCION
+   SECTION TITLES
    ============================= */
 .section-title {
-  font-size: 1.3rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--ts-text);
-  margin-bottom: 1.25rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 3px solid var(--ts-primary);
+  margin-bottom: 1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 3px solid var(--ts-teal);
   display: inline-block;
 }
 
@@ -491,37 +527,35 @@ body {
    FOOTER
    ============================= */
 .footer-ts {
-  background-color: var(--ts-primary-dark);
-  color: rgba(255,255,255,0.8);
-  padding: 2rem 0;
+  background-color: #1A0A2E;
+  color: rgba(255,255,255,0.75);
+  padding: 2rem 0 1rem;
   margin-top: auto;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .footer-ts a {
-  color: rgba(255,255,255,0.7);
+  color: rgba(255,255,255,0.6);
   text-decoration: none;
   transition: color 0.2s;
 }
 
-.footer-ts a:hover {
-  color: white;
-}
+.footer-ts a:hover { color: white; }
 
 /* ============================
    ANIMACIONES
    ============================= */
 .fade-in {
-  animation: fadeIn 0.4s ease-in;
+  animation: fadeIn 0.35s ease-out;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ============================
-   LOADING SPINNER
+   LOADING / PAGINATION / MODAL
    ============================= */
 .loading-spinner {
   display: flex;
@@ -530,50 +564,30 @@ body {
   height: 200px;
 }
 
-/* ============================
-   PAGINACION
-   ============================= */
-.pagination {
-  justify-content: center;
-}
+.pagination { justify-content: center; }
 
-/* ============================
-   MODAL
-   ============================= */
 .modal-content {
-  border-radius: 10px;
+  border-radius: 8px;
   border: none;
 }
 
 /* ============================
    RESPONSIVE
    ============================= */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
   .navbar-search {
     margin: 0.5rem 0;
     max-width: 100%;
   }
+}
 
-  .cart-item {
-    padding: 1rem;
-  }
+@media (max-width: 768px) {
+  .hero-section { padding: 2rem 0; }
+  .hero-section h1 { font-size: 1.5rem; }
 
-  .cart-item-image {
-    width: 60px;
-    height: 60px;
-  }
-
-  .cart-item-price {
-    min-width: 80px;
-    font-size: 1rem;
-  }
-
-  .cart-summary-card {
-    position: static;
-    margin-top: 1rem;
-  }
-
-  .product-image {
-    height: 150px;
-  }
+  .cart-item { padding: 0.75rem 1rem; }
+  .cart-item-image { width: 56px; height: 56px; }
+  .cart-item-price { min-width: 80px; font-size: 0.95rem; }
+  .cart-summary-card { position: static; margin-top: 1rem; }
+  .product-image { height: 130px; }
 }

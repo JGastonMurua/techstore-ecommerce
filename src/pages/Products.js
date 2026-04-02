@@ -54,18 +54,18 @@ function Products() {
       </Helmet>
 
       {/* Header */}
-      <div style={{ background: 'var(--ts-primary)', padding: '1.25rem 0' }}>
+      <div style={{ background: 'var(--ts-bg-white)', borderBottom: '1px solid var(--ts-border-light)', padding: '0.85rem 0' }}>
         <Container>
-          <h1 style={{ color: 'white', fontWeight: 700, fontSize: '1.4rem', margin: 0 }}>
+          <h1 style={{ color: 'var(--ts-text)', fontWeight: 700, fontSize: '1.2rem', margin: 0 }}>
             {selectedCategory !== 'all'
               ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)
               : 'Todos los productos'}
+            {totalFilteredProducts > 0 && !loading && (
+              <span style={{ fontWeight: 400, fontSize: '0.85rem', color: 'var(--ts-text-muted)', marginLeft: '0.5rem' }}>
+                ({totalFilteredProducts} resultado{totalFilteredProducts !== 1 ? 's' : ''})
+              </span>
+            )}
           </h1>
-          {totalFilteredProducts > 0 && !loading && (
-            <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.85rem', margin: '0.25rem 0 0' }}>
-              {totalFilteredProducts} resultado{totalFilteredProducts !== 1 ? 's' : ''}
-            </p>
-          )}
         </Container>
       </div>
 

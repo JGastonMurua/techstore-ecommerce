@@ -35,70 +35,53 @@ function Home() {
         <meta name="keywords" content="tecnologia, laptops, smartphones, tablets, ecommerce, online" />
       </Helmet>
 
-      {/* Hero */}
+      {/* Hero — compacto */}
       <section className="hero-section">
         <Container>
-          <Row className="align-items-center py-3">
-            <Col lg={6}>
+          <Row className="align-items-center">
+            <Col lg={7}>
               {isAuthenticated() && (
-                <div
-                  className="fade-in mb-3 px-3 py-2 rounded"
-                  style={{ background: 'rgba(255,255,255,0.15)', display: 'inline-block' }}
-                >
-                  Hola, <strong>{userName}</strong>
+                <div className="fade-in mb-2" style={{ fontSize: '0.85rem', opacity: 0.85 }}>
+                  Hola de vuelta, <strong>{userName}</strong>
                 </div>
               )}
-              <h1 className="display-4 fw-bold mb-3 fade-in">
+              <h1 className="fade-in">
                 {isAuthenticated()
-                  ? `Bienvenido de vuelta, ${userName}`
+                  ? `Bienvenido, ${userName}`
                   : 'La tecnologia que buscas, al mejor precio'}
               </h1>
-              <p className="lead mb-4 fade-in" style={{ opacity: 0.9 }}>
+              <p className="lead fade-in">
                 {isAdmin()
-                  ? 'Gestiona tu tienda y descubre las herramientas de administracion.'
-                  : 'Laptops, smartphones, tablets y accesorios con envio a todo el pais.'}
+                  ? 'Gestioná tu tienda desde el panel de administracion.'
+                  : 'Laptops, smartphones, tablets y accesorios. Envio a todo el pais.'}
               </p>
-              <div className="d-flex flex-wrap gap-3 fade-in">
+              <div className="d-flex flex-wrap gap-2 fade-in">
                 {isAdmin() ? (
                   <>
                     <LinkContainer to="/admin">
-                      <button className="btn btn-hero-primary">
-                        <FaCog className="me-2" />
-                        Panel de Admin
-                      </button>
+                      <button className="btn-hero-primary"><FaCog size={13} />Panel Admin</button>
                     </LinkContainer>
                     <LinkContainer to="/productos">
-                      <button className="btn btn-hero-secondary">
-                        <FaShoppingBag className="me-2" />
-                        Ver Tienda
-                      </button>
+                      <button className="btn-hero-secondary"><FaShoppingBag size={13} />Ver Tienda</button>
                     </LinkContainer>
                   </>
                 ) : (
                   <>
                     <LinkContainer to="/productos">
-                      <button className="btn btn-hero-primary">
-                        <FaShoppingBag className="me-2" />
-                        Ver Productos
-                      </button>
+                      <button className="btn-hero-primary"><FaShoppingBag size={13} />Ver Productos</button>
                     </LinkContainer>
                     {!isAuthenticated() && (
                       <LinkContainer to="/register">
-                        <button className="btn btn-hero-secondary">
-                          Crear cuenta gratis
-                        </button>
+                        <button className="btn-hero-secondary">Crear cuenta gratis</button>
                       </LinkContainer>
                     )}
                   </>
                 )}
               </div>
             </Col>
-            <Col lg={6} className="text-center d-none d-lg-block">
-              <div className="fade-in">
-                {isAdmin()
-                  ? <FaCog size={180} style={{ opacity: 0.4 }} />
-                  : <FaLaptop size={180} style={{ opacity: 0.4 }} />
-                }
+            <Col lg={5} className="text-center d-none d-lg-flex align-items-center justify-content-end">
+              <div className="fade-in" style={{ opacity: 0.35 }}>
+                {isAdmin() ? <FaCog size={140} /> : <FaLaptop size={140} />}
               </div>
             </Col>
           </Row>
