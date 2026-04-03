@@ -18,7 +18,7 @@ function AppNavbar() {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/productos?q=${encodeURIComponent(searchQuery.trim())}`);
+      navigate({ pathname: '/productos', search: `?q=${encodeURIComponent(searchQuery.trim())}` });
     }
   };
 
@@ -168,7 +168,7 @@ function AppNavbar() {
               <a className="category-link">Todos</a>
             </LinkContainer>
             {CATEGORIES.map(cat => (
-              <LinkContainer key={cat} to={`/productos?q=${cat}`}>
+              <LinkContainer key={cat} to={{ pathname: '/productos', search: `?q=${cat}` }}>
                 <a className="category-link">{cat}</a>
               </LinkContainer>
             ))}
