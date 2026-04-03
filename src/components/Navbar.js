@@ -16,8 +16,8 @@ function AppNavbar() {
   const totalItems = getTotalItems();
 
   const handleLogout = () => {
-    logout();
     navigate('/');
+    logout();
   };
 
   const handleSearch = (e) => {
