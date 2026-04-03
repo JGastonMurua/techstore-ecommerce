@@ -120,40 +120,6 @@ function Home() {
         </section>
       )}
 
-      {/* Categorias */}
-      <section className="py-5" style={{ background: 'white' }}>
-        <Container>
-          <h2 className="section-title mb-4">Categorias</h2>
-          <Row className="g-3">
-            {categories.map((cat, i) => {
-              const Icon = cat.icon;
-              return (
-                <Col md={6} lg={3} key={i}>
-                  <LinkContainer to="/productos">
-                    <div
-                      style={{
-                        background: 'var(--ts-bg)',
-                        border: '1px solid var(--ts-border)',
-                        borderRadius: 10,
-                        padding: '1.5rem',
-                        textAlign: 'center',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                      }}
-                      onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--ts-primary)'; e.currentTarget.style.background = '#EDE7F6'; }}
-                      onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--ts-border)'; e.currentTarget.style.background = 'var(--ts-bg)'; }}
-                    >
-                      <Icon size={40} style={{ color: 'var(--ts-primary)', marginBottom: '0.75rem' }} />
-                      <div style={{ fontWeight: 600, color: 'var(--ts-text)' }}>{cat.name}</div>
-                    </div>
-                  </LinkContainer>
-                </Col>
-              );
-            })}
-          </Row>
-        </Container>
-      </section>
-
       {/* Productos destacados */}
       <section className="py-5" style={{ background: 'var(--ts-bg)' }}>
         <Container>
