@@ -6,7 +6,7 @@ import { FaShoppingCart, FaLaptop, FaCog, FaUser, FaSignInAlt, FaSignOutAlt, FaS
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
-const CATEGORIES = ['Laptops', 'Smartphones', 'Tablets', 'Accesorios'];
+const CATEGORIES = ['Laptops', 'Smartphones', 'Tablets'];
 
 function AppNavbar() {
   const { getTotalItems } = useCart();
@@ -172,9 +172,6 @@ function AppNavbar() {
                 <a className="category-link">{cat}</a>
               </LinkContainer>
             ))}
-            <LinkContainer to="/productos">
-              <a className="category-link">Ofertas</a>
-            </LinkContainer>
           </div>
         </Container>
       </div>

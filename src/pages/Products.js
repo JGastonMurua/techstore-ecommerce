@@ -23,13 +23,11 @@ function Products() {
 
   const [searchParams] = useSearchParams();
 
-  // Leer ?q= de la URL y aplicarlo al buscador
+  // Leer ?q= de la URL y aplicarlo al buscador (o limpiarlo si no hay query)
   useEffect(() => {
     const q = searchParams.get('q');
-    if (q) {
-      setSearchTerm(q);
-      setCurrentPage(1);
-    }
+    setSearchTerm(q || '');
+    setCurrentPage(1);
   }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const paginatedProducts = getPaginatedProducts();
