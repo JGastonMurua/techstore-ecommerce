@@ -15,6 +15,11 @@ function AppNavbar() {
   const navigate = useNavigate();
   const totalItems = getTotalItems();
 
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -130,7 +135,7 @@ function AppNavbar() {
                         </Dropdown.Item>
                       </LinkContainer>
                       <Dropdown.Divider />
-                      <Dropdown.Item onClick={logout} className="text-danger">
+                      <Dropdown.Item onClick={handleLogout} className="text-danger">
                         <FaSignOutAlt className="me-2" size={12} />Cerrar Sesion
                       </Dropdown.Item>
                     </Dropdown.Menu>
