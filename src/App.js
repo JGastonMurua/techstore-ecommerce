@@ -13,6 +13,7 @@ import { WishlistProvider } from './context/WishlistContext';
 import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import NotFound from './pages/NotFound';
+import { CONFIG } from './config/cliente';
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -98,7 +99,7 @@ function App() {
 
               {/* WhatsApp flotante */}
               <a
-                href="https://wa.me/5491130484275"
+                href={`https://wa.me/${CONFIG.whatsapp}`}
                 className="whatsapp-float"
                 target="_blank"
                 rel="noreferrer"

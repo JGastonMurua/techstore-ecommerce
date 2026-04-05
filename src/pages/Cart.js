@@ -3,6 +3,7 @@ import { Container, Row, Col, Button } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import { FaTrash, FaPlus, FaMinus, FaShoppingBag, FaArrowLeft, FaCreditCard, FaLock, FaTruck, FaUndo } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
+import { CONFIG } from '../config/cliente';
 
 function Cart() {
   const {
@@ -18,7 +19,7 @@ function Cart() {
 
   const totalItems = getTotalItems();
   const totalPrice = getTotalPrice();
-  const shippingCost = totalPrice > 50000 ? 0 : 5000;
+  const shippingCost = totalPrice > CONFIG.envioGratisDesde ? 0 : CONFIG.costoEnvio;
   const finalTotal = totalPrice + shippingCost;
 
   const formatPrice = (price) => {
@@ -175,12 +176,12 @@ function Cart() {
                 ) : (
                   <>
                     <div style={{ color: 'var(--ts-text-muted)' }}>
-                      Te faltan <strong style={{ color: 'var(--ts-text)' }}>{formatPrice(50000 - totalPrice)}</strong> para envio gratis
+                      Te faltan <strong style={{ color: 'var(--ts-text)' }}>{formatPrice(CONFIG.envioGratisDesde - totalPrice)}</strong> para envio gratis
                     </div>
                     <div className="shipping-progress-bar-track">
                       <div
                         className="shipping-progress-bar-fill"
-                        style={{ width: `${Math.min(100, (totalPrice / 50000) * 100)}%` }}
+                        style={{ width: `${Math.min(100, (totalPrice / CONFIG.envioGratisDesde) * 100)}%` }}
                       />
                     </div>
                   </>

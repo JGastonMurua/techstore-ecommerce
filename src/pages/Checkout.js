@@ -3,19 +3,9 @@ import { Container, Row, Col, Form } from 'react-bootstrap';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
 import { FaCheck, FaShoppingCart, FaMapMarkerAlt, FaCreditCard, FaLock, FaEnvelope } from 'react-icons/fa';
-import emailjs from '@emailjs/browser';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-
-// ── Configuracion EmailJS ──────────────────────────────────────────
-// 1. Creá una cuenta en https://www.emailjs.com (gratis)
-// 2. Conectá tu Gmail como servicio y copiá el Service ID
-// 3. Creá una plantilla de email y copiá el Template ID
-// 4. En Account > API Keys copiá tu Public Key
-const EMAILJS_SERVICE_ID  = 'TU_SERVICE_ID';
-const EMAILJS_TEMPLATE_ID = 'TU_TEMPLATE_ID';
-const EMAILJS_PUBLIC_KEY  = 'TU_PUBLIC_KEY';
-// ──────────────────────────────────────────────────────────────────
+import { CONFIG } from '../config/cliente';
 
 const STEPS = ['Datos', 'Pago', 'Confirmacion'];
 
@@ -40,21 +30,22 @@ function Checkout() {
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(price);
 
   const sendConfirmationEmail = async () => {
+    const total = getTotalPrice();
+    const shipping = total > CONFIG.envioGratisDesde ? 0 : CONFIG.costoEnvio;
     try {
-      await emailjs.send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        {
-          to_name:   `${form.nombre} ${form.apellido}`,
-          to_email:  form.email,
-          order_id:  `TS-${orderId}`,
-          order_total: formatPrice(getTotalPrice() + (getTotalPrice() > 50000 ? 0 : 5000)),
+      const res = await fetch(`${CONFIG.backendUrl}/api/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to_name:          `${form.nombre} ${form.apellido}`,
+          to_email:         form.email,
+          order_id:         `TS-${orderId}`,
+          order_total:      formatPrice(total + shipping),
           delivery_address: `${form.direccion}, ${form.ciudad}`,
-          payment_method: form.metodoPago,
-        },
-        EMAILJS_PUBLIC_KEY
-      );
-      setEmailSent(true);
+          payment_method:   form.metodoPago,
+        })
+      });
+      if (res.ok) setEmailSent(true);
     } catch (error) {
       console.error('Error enviando email de confirmacion:', error);
       setEmailSent(false);
