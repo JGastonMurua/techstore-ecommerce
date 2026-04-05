@@ -2,18 +2,35 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Form } from 'react-bootstrap';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
-import { FaCheck, FaShoppingCart, FaMapMarkerAlt, FaCreditCard, FaLock } from 'react-icons/fa';
+import { FaCheck, FaShoppingCart, FaMapMarkerAlt, FaCreditCard, FaLock, FaEnvelope } from 'react-icons/fa';
+import emailjs from '@emailjs/browser';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+
+// ── Configuracion EmailJS ──────────────────────────────────────────
+// 1. Creá una cuenta en https://www.emailjs.com (gratis)
+// 2. Conectá tu Gmail como servicio y copiá el Service ID
+// 3. Creá una plantilla de email y copiá el Template ID
+// 4. En Account > API Keys copiá tu Public Key
+const EMAILJS_SERVICE_ID  = 'TU_SERVICE_ID';
+const EMAILJS_TEMPLATE_ID = 'TU_TEMPLATE_ID';
+const EMAILJS_PUBLIC_KEY  = 'TU_PUBLIC_KEY';
+// ──────────────────────────────────────────────────────────────────
 
 const STEPS = ['Datos', 'Pago', 'Confirmacion'];
 
 function Checkout() {
   const { cartItems, getTotalPrice, clearCart } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [orderId] = useState(() => Math.floor(Math.random() * 90000) + 10000);
+  const [emailSent, setEmailSent] = useState(false);
   const [form, setForm] = useState({
-    nombre: '', apellido: '', email: '', telefono: '',
+    nombre: user?.name || '',
+    apellido: user?.lastName || '',
+    email: user?.email || '',
+    telefono: '',
     direccion: '', ciudad: '', provincia: '',
     metodoPago: 'tarjeta', numeroTarjeta: '', vencimiento: '', cvv: ''
   });
@@ -21,6 +38,28 @@ function Checkout() {
 
   const formatPrice = (price) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(price);
+
+  const sendConfirmationEmail = async () => {
+    try {
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        {
+          to_name:   `${form.nombre} ${form.apellido}`,
+          to_email:  form.email,
+          order_id:  `TS-${orderId}`,
+          order_total: formatPrice(getTotalPrice() + (getTotalPrice() > 50000 ? 0 : 5000)),
+          delivery_address: `${form.direccion}, ${form.ciudad}`,
+          payment_method: form.metodoPago,
+        },
+        EMAILJS_PUBLIC_KEY
+      );
+      setEmailSent(true);
+    } catch (error) {
+      console.error('Error enviando email de confirmacion:', error);
+      setEmailSent(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -50,10 +89,11 @@ function Checkout() {
     return Object.keys(e).length === 0;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step === 1 && !validateStep1()) return;
     if (step === 2 && !validateStep2()) return;
     if (step === 3) { clearCart(); navigate('/'); return; }
+    if (step === 2) await sendConfirmationEmail();
     setStep(s => s + 1);
   };
 
@@ -229,9 +269,21 @@ function Checkout() {
                   <FaCheck size={28} color="white" />
                 </div>
                 <h4 style={{ fontWeight: 700, marginBottom: '0.5rem' }}>Pedido confirmado</h4>
-                <p style={{ color: 'var(--ts-text-muted)', marginBottom: '2rem' }}>
-                  Gracias <strong>{form.nombre}</strong>! Recibirás un email de confirmacion en <strong>{form.email}</strong>.
+                <p style={{ color: 'var(--ts-text-muted)', marginBottom: '1rem' }}>
+                  Gracias <strong>{form.nombre}</strong>! Tu pedido fue confirmado.
                 </p>
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  background: emailSent ? 'rgba(0,137,123,0.08)' : 'var(--ts-bg)',
+                  border: `1px solid ${emailSent ? 'var(--ts-teal)' : 'var(--ts-border)'}`,
+                  borderRadius: 8, padding: '0.6rem 1rem', marginBottom: '1.5rem', fontSize: '0.85rem'
+                }}>
+                  <FaEnvelope size={13} style={{ color: emailSent ? 'var(--ts-teal)' : 'var(--ts-text-muted)', flexShrink: 0 }} />
+                  {emailSent
+                    ? <span>Te enviamos un email de confirmacion a <strong>{form.email}</strong></span>
+                    : <span style={{ color: 'var(--ts-text-muted)' }}>Revisá tu casilla <strong>{form.email}</strong> para ver el comprobante</span>
+                  }
+                </div>
                 <div style={{ background: 'var(--ts-bg)', borderRadius: 8, padding: '1rem 1.25rem', textAlign: 'left', marginBottom: '1.5rem', fontSize: '0.85rem' }}>
                   {[
                     ['Numero de orden', `#TS-${orderId}`],
