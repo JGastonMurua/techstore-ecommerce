@@ -6,8 +6,6 @@ import { FaShoppingCart, FaLaptop, FaCog, FaUser, FaSignInAlt, FaSignOutAlt } fr
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
-const CATEGORIES = ['Laptops', 'Smartphones', 'Tablets'];
-
 function AppNavbar() {
   const { getTotalItems } = useCart();
   const { isAuthenticated, isAdmin, logout, userName, user } = useAuth();
@@ -125,21 +123,6 @@ function AppNavbar() {
         </Container>
       </Navbar>
 
-      {/* Barra de categorias — EBAY STYLE */}
-      <div className="categories-bar d-none d-lg-block">
-        <Container fluid className="px-3 px-lg-4">
-          <div className="inner">
-            <LinkContainer to="/productos">
-              <a className="category-link">Todos</a>
-            </LinkContainer>
-            {CATEGORIES.map(cat => (
-              <LinkContainer key={cat} to={{ pathname: '/productos', search: `?q=${cat}` }}>
-                <a className="category-link">{cat}</a>
-              </LinkContainer>
-            ))}
-          </div>
-        </Container>
-      </div>
     </>
   );
 }
