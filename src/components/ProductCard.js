@@ -13,9 +13,10 @@ const getMockReviews = (id) => {
   return 20 + (hash % 180);
 };
 const renderStars = (rating) => {
-  const full = Math.floor(rating);
-  const half = rating % 1 >= 0.5;
-  const empty = 5 - full - (half ? 1 : 0);
+  const safe = Math.min(5, Math.max(0, isNaN(Number(rating)) ? 4 : Number(rating)));
+  const full = Math.floor(safe);
+  const half = safe % 1 >= 0.5;
+  const empty = Math.max(0, 5 - full - (half ? 1 : 0));
   return [
     ...[...Array(full)].map((_, i) => <FaStar key={`f${i}`} />),
     ...(half ? [<FaStarHalfAlt key="h" />] : []),
