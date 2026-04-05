@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Navbar, Nav, Container, Badge, Dropdown } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { FaShoppingCart, FaLaptop, FaCog, FaUser, FaSignInAlt, FaSignOutAlt, FaSearch } from 'react-icons/fa';
+import { FaShoppingCart, FaLaptop, FaCog, FaUser, FaSignInAlt, FaSignOutAlt } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -11,20 +11,12 @@ const CATEGORIES = ['Laptops', 'Smartphones', 'Tablets'];
 function AppNavbar() {
   const { getTotalItems } = useCart();
   const { isAuthenticated, isAdmin, logout, userName, user } = useAuth();
-  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const totalItems = getTotalItems();
 
   const handleLogout = () => {
     navigate('/');
     logout();
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate({ pathname: '/productos', search: `?q=${encodeURIComponent(searchQuery.trim())}` });
-    }
   };
 
   return (
@@ -41,41 +33,9 @@ function AppNavbar() {
             </Navbar.Brand>
           </LinkContainer>
 
-          {/* Busqueda — desktop */}
-          <form className="navbar-search d-none d-lg-flex" onSubmit={handleSearch}>
-            <div className="input-group">
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Busca productos, marcas y categorias..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <button type="submit" className="btn-search">
-                <FaSearch size={14} />
-              </button>
-            </div>
-          </form>
-
           <Navbar.Toggle aria-controls="navbar-nav" />
 
           <Navbar.Collapse id="navbar-nav">
-            {/* Busqueda — mobile */}
-            <form className="navbar-search d-flex d-lg-none my-2" onSubmit={handleSearch}>
-              <div className="input-group">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Buscar..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <button type="submit" className="btn-search">
-                  <FaSearch size={13} />
-                </button>
-              </div>
-            </form>
-
             <Nav className="ms-lg-auto align-items-lg-center gap-1">
 
               {/* Carrito */}
