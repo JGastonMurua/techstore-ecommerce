@@ -97,7 +97,7 @@ function Cart() {
             Agrega productos para comenzar tu compra
           </p>
           <LinkContainer to="/productos">
-            <Button style={{ backgroundColor: 'var(--ts-primary)', border: 'none', fontWeight: 600 }}>
+            <Button style={{ backgroundColor: 'var(--ts-purple)', border: 'none', fontWeight: 600 }}>
               <FaShoppingBag className="me-2" />
               Ver productos
             </Button>
@@ -114,7 +114,7 @@ function Cart() {
         {/* Titulo y volver */}
         <div className="d-flex align-items-center gap-3 mb-3">
           <LinkContainer to="/productos">
-            <Button variant="link" className="p-0 text-decoration-none" style={{ color: 'var(--ts-primary)' }}>
+            <Button variant="link" className="p-0 text-decoration-none" style={{ color: 'var(--ts-purple)' }}>
               <FaArrowLeft className="me-1" size={13} />
               Seguir comprando
             </Button>
@@ -223,11 +223,26 @@ function Cart() {
                 )}
               </div>
 
-              {shippingCost > 0 && (
-                <div style={{ fontSize: '0.8rem', color: 'var(--ts-success)', marginBottom: '0.5rem' }}>
-                  Agrega {formatPrice(50000 - totalPrice)} mas para envio gratis
-                </div>
-              )}
+              {/* Progreso hacia envio gratis */}
+              <div className="shipping-progress">
+                {shippingCost === 0 ? (
+                  <div style={{ color: 'var(--ts-success)', fontWeight: 600, fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <FaTruck size={12} /> ¡Tenes envio gratis!
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ color: 'var(--ts-text-muted)' }}>
+                      Te faltan <strong style={{ color: 'var(--ts-text)' }}>{formatPrice(50000 - totalPrice)}</strong> para envio gratis
+                    </div>
+                    <div className="shipping-progress-bar-track">
+                      <div
+                        className="shipping-progress-bar-fill"
+                        style={{ width: `${Math.min(100, (totalPrice / 50000) * 100)}%` }}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
 
               <div className="cart-summary-row total">
                 <span>Total</span>

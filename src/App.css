@@ -834,3 +834,27 @@ a:hover { color: var(--ts-purple-dark); }
   transition: box-shadow 0.2s;
 }
 .wishlist-item-mini:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+/* ============================
+   BARRA DE PROGRESO ENVIO GRATIS
+   ============================= */
+.shipping-progress {
+  background: var(--ts-bg);
+  border-radius: 6px;
+  padding: 0.65rem 0.75rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.81rem;
+}
+.shipping-progress-bar-track {
+  height: 5px;
+  background: var(--ts-border);
+  border-radius: 3px;
+  margin-top: 0.45rem;
+  overflow: hidden;
+}
+.shipping-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ts-teal-light), var(--ts-teal));
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}

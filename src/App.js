@@ -11,6 +11,8 @@ import { ProductProvider } from './context/ProductContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
+import NotFound from './pages/NotFound';
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -34,6 +36,7 @@ function App() {
             <div className="App">
               <Navbar />
               <main className="flex-grow-1">
+                <ErrorBoundary>
                 <Routes>
                   {/* Rutas públicas */}
                   <Route path="/" element={<Home />} />
@@ -79,7 +82,9 @@ function App() {
                       </ProtectedRoute>
                     } 
                   />
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
+                </ErrorBoundary>
               </main>
               
               <Footer />

@@ -61,6 +61,7 @@ function ProductCard({ product }) {
           src={product.imagen || 'https://via.placeholder.com/300x200?text=Sin+Imagen'}
           alt={product.nombre}
           className="product-image w-100"
+          loading="lazy"
         />
         <button
           className={`wishlist-btn ${inWishlist ? 'active' : ''}`}

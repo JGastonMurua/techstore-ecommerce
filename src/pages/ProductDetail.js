@@ -129,6 +129,7 @@ function ProductDetail() {
                 <img
                   src={product.imagen || 'https://via.placeholder.com/400x400?text=Sin+Imagen'}
                   alt={product.nombre}
+                  loading="lazy"
                   style={{ maxWidth: '100%', maxHeight: 340, objectFit: 'contain' }}
                 />
               </div>
