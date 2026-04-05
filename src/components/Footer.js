@@ -11,8 +11,8 @@ function Footer() {
         <Container>
           <div className="d-flex flex-wrap align-items-center justify-content-between gap-2">
             <span style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.7)' }}>
-              Este proyecto es una <strong style={{ color: 'rgba(255,255,255,0.9)' }}>demo de e-commerce</strong> construida con React.
-              &nbsp;¿Tu empresa necesita algo así? Lo desarrollamos juntos.
+              <strong style={{ color: 'rgba(255,255,255,0.9)' }}>¿Tu negocio necesita una tienda online profesional como esta?</strong>
+              &nbsp;Hablame y la armamos juntos.
             </span>
             <a
               href="mailto:gastton.murua@gmail.com"
