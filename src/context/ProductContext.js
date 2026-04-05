@@ -13,6 +13,8 @@ export function ProductProvider({ children }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedCategory, setSelectedCategory] = useState('all');
+    const [sortOrder, setSortOrder] = useState('default');
+    const [onlyInStock, setOnlyInStock] = useState(false);
     const productsPerPage = 8;
 
     // Cargar productos al iniciar
@@ -135,14 +137,12 @@ export function ProductProvider({ children }) {
     const getFilteredProducts = () => {
         let filtered = [...products];
 
-        // Filtrar por categoría
         if (selectedCategory !== 'all') {
             filtered = filtered.filter(product =>
                 product.categoria?.toLowerCase() === selectedCategory.toLowerCase()
             );
         }
 
-        // Filtrar por término de búsqueda
         if (searchTerm) {
             filtered = filtered.filter(product =>
                 product.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -150,6 +150,16 @@ export function ProductProvider({ children }) {
                 product.categoria?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 product.marca?.toLowerCase().includes(searchTerm.toLowerCase())
             );
+        }
+
+        if (onlyInStock) {
+            filtered = filtered.filter(product => (product.stock || 0) > 0);
+        }
+
+        if (sortOrder === 'price-asc') {
+            filtered = [...filtered].sort((a, b) => (a.precio || 0) - (b.precio || 0));
+        } else if (sortOrder === 'price-desc') {
+            filtered = [...filtered].sort((a, b) => (b.precio || 0) - (a.precio || 0));
         }
 
         return filtered;
@@ -196,6 +206,10 @@ export function ProductProvider({ children }) {
         setSearchTerm,
         setCurrentPage,
         setSelectedCategory,
+        sortOrder,
+        setSortOrder,
+        onlyInStock,
+        setOnlyInStock,
         getFilteredProducts,
         getPaginatedProducts,
         getTotalPages,

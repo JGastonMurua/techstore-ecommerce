@@ -591,3 +591,246 @@ a:hover { color: var(--ts-purple-dark); }
   .cart-summary-card { position: static; margin-top: 1rem; }
   .product-image { height: 130px; }
 }
+
+/* ============================
+   ESTRELLAS / RATING
+   ============================= */
+.star-rating {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: #F59E0B;
+  font-size: 0.75rem;
+  margin-bottom: 0.2rem;
+}
+.star-rating .review-count {
+  color: var(--ts-text-muted);
+  font-size: 0.73rem;
+  margin-left: 2px;
+}
+
+/* ============================
+   WISHLIST HEART
+   ============================= */
+.wishlist-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  transition: transform 0.15s;
+  z-index: 1;
+}
+.wishlist-btn:hover { transform: scale(1.15); }
+.wishlist-btn.active { color: #E53935; }
+.wishlist-btn:not(.active) { color: #ccc; }
+
+/* ============================
+   WHATSAPP FLOTANTE
+   ============================= */
+.whatsapp-float {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 52px;
+  height: 52px;
+  background: #25D366;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 14px rgba(37,211,102,0.5);
+  z-index: 1000;
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+}
+.whatsapp-float:hover {
+  transform: scale(1.1);
+  box-shadow: 0 5px 20px rgba(37,211,102,0.6);
+  color: white;
+}
+
+/* ============================
+   SORT BAR
+   ============================= */
+.sort-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 0.55rem 0.85rem;
+  background: white;
+  border: 1px solid var(--ts-border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+.sort-bar .sort-label {
+  color: var(--ts-text-muted);
+  white-space: nowrap;
+  font-size: 0.82rem;
+}
+.sort-btn {
+  background: transparent;
+  border: 1px solid var(--ts-border);
+  border-radius: 20px;
+  padding: 0.18rem 0.7rem;
+  font-size: 0.79rem;
+  color: var(--ts-text-mid);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.sort-btn:hover { border-color: var(--ts-purple); color: var(--ts-purple); }
+.sort-btn.active { background: var(--ts-purple); border-color: var(--ts-purple); color: white; }
+
+.stock-filter {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  margin-left: auto;
+  color: var(--ts-text-muted);
+  font-size: 0.79rem;
+  white-space: nowrap;
+}
+.stock-filter input { cursor: pointer; accent-color: var(--ts-purple); }
+
+/* ============================
+   CHECKOUT STEPPER
+   ============================= */
+.checkout-stepper {
+  display: flex;
+  align-items: flex-start;
+}
+.checkout-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  position: relative;
+  flex: 1;
+}
+.checkout-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 55%;
+  width: 90%;
+  height: 2px;
+  background: var(--ts-border);
+}
+.checkout-step.done::after,
+.checkout-step.active::after {
+  background: var(--ts-teal);
+}
+.checkout-step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--ts-border);
+  background: white;
+  color: var(--ts-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  z-index: 1;
+  transition: all 0.2s;
+}
+.checkout-step.active .checkout-step-circle {
+  border-color: var(--ts-teal);
+  background: var(--ts-teal);
+  color: white;
+}
+.checkout-step.done .checkout-step-circle {
+  border-color: var(--ts-teal);
+  background: var(--ts-teal);
+  color: white;
+}
+.checkout-step-label {
+  font-size: 0.74rem;
+  color: var(--ts-text-muted);
+  white-space: nowrap;
+}
+.checkout-step.active .checkout-step-label {
+  color: var(--ts-teal);
+  font-weight: 600;
+}
+
+/* ============================
+   SKELETON LOADER
+   ============================= */
+.skeleton-box {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e4e4e4 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 6px;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ============================
+   MI CUENTA — TECHSTORE STYLE
+   ============================= */
+.account-header {
+  background: linear-gradient(120deg, var(--ts-purple) 0%, var(--ts-purple-light) 100%);
+  color: white;
+  padding: 2rem 0;
+}
+.account-card {
+  background: white;
+  border: 1px solid var(--ts-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.account-card-header {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--ts-border-light);
+  font-weight: 700;
+  font-size: 0.92rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ts-text);
+}
+.account-card-body {
+  padding: 1.25rem;
+}
+.account-stat {
+  text-align: center;
+  padding: 1rem;
+}
+.account-stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+.account-stat-label {
+  font-size: 0.78rem;
+  color: var(--ts-text-muted);
+}
+.wishlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+.wishlist-item-mini {
+  border: 1px solid var(--ts-border);
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 0.8rem;
+  transition: box-shadow 0.2s;
+}
+.wishlist-item-mini:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }

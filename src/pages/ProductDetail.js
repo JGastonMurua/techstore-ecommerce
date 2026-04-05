@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Spinner } from 'react-bootstrap';
+import { Container, Row, Col } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import { FaShoppingCart, FaArrowLeft, FaCheck, FaTruck, FaShieldAlt, FaUndo, FaTag } from 'react-icons/fa';
 import { Helmet } from 'react-helmet';
 import { useProducts } from '../context/ProductContext';
 import { useCart } from '../context/CartContext';
+import ProductCard from '../components/ProductCard';
 
 function ProductDetail() {
   const { id } = useParams();
@@ -40,10 +41,29 @@ function ProductDetail() {
     addToCart(product);
   };
 
+  const relatedProducts = product
+    ? products.filter(p => p.categoria === product.categoria && String(p.id) !== String(id)).slice(0, 4)
+    : [];
+
   if (loading || !product) {
     return (
-      <Container className="py-5 text-center">
-        <Spinner animation="border" style={{ color: 'var(--ts-primary)' }} />
+      <Container className="py-5">
+        <Row className="g-5">
+          <Col lg={5}>
+            <div className="skeleton-box" style={{ height: 360, borderRadius: 12 }} />
+          </Col>
+          <Col lg={4}>
+            <div className="skeleton-box" style={{ height: 16, width: '35%', marginBottom: 12 }} />
+            <div className="skeleton-box" style={{ height: 26, marginBottom: 6 }} />
+            <div className="skeleton-box" style={{ height: 26, width: '75%', marginBottom: 24 }} />
+            <div className="skeleton-box" style={{ height: 40, width: '45%', marginBottom: 10 }} />
+            <div className="skeleton-box" style={{ height: 14, width: '55%', marginBottom: 32 }} />
+            <div className="skeleton-box" style={{ height: 48, borderRadius: 8 }} />
+          </Col>
+          <Col lg={3}>
+            <div className="skeleton-box" style={{ height: 180, borderRadius: 10 }} />
+          </Col>
+        </Row>
       </Container>
     );
   }
@@ -65,9 +85,9 @@ function ProductDetail() {
       <div style={{ background: 'white', borderBottom: '1px solid var(--ts-border)', padding: '0.6rem 0' }}>
         <Container>
           <nav style={{ fontSize: '0.82rem', color: 'var(--ts-text-muted)' }}>
-            <LinkContainer to="/"><a style={{ color: 'var(--ts-primary)', textDecoration: 'none' }}>Inicio</a></LinkContainer>
+            <LinkContainer to="/"><a style={{ color: 'var(--ts-purple)', textDecoration: 'none' }}>Inicio</a></LinkContainer>
             <span className="mx-2">›</span>
-            <LinkContainer to="/productos"><a style={{ color: 'var(--ts-primary)', textDecoration: 'none' }}>Productos</a></LinkContainer>
+            <LinkContainer to="/productos"><a style={{ color: 'var(--ts-purple)', textDecoration: 'none' }}>Productos</a></LinkContainer>
             {product.categoria && (
               <>
                 <span className="mx-2">›</span>
@@ -86,7 +106,7 @@ function ProductDetail() {
 
           <button
             onClick={() => navigate(-1)}
-            style={{ background: 'none', border: 'none', color: 'var(--ts-primary)', fontSize: '0.85rem', cursor: 'pointer', padding: 0, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: 6 }}
+            style={{ background: 'none', border: 'none', color: 'var(--ts-purple)', fontSize: '0.85rem', cursor: 'pointer', padding: 0, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: 6 }}
           >
             <FaArrowLeft size={12} />
             Volver
@@ -133,7 +153,7 @@ function ProductDetail() {
               {product.categoria && (
                 <span style={{
                   background: 'var(--ts-bg)',
-                  color: 'var(--ts-primary)',
+                  color: 'var(--ts-purple)',
                   fontSize: '0.78rem',
                   padding: '0.2rem 0.6rem',
                   borderRadius: 20,
@@ -180,7 +200,7 @@ function ProductDetail() {
 
               {/* En carrito */}
               {currentQty > 0 && (
-                <div style={{ color: 'var(--ts-primary)', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ color: 'var(--ts-purple)', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: 6 }}>
                   <FaCheck size={12} />
                   {currentQty} unidad{currentQty > 1 ? 'es' : ''} en tu carrito
                 </div>
@@ -192,7 +212,7 @@ function ProductDetail() {
                 disabled={outOfStock || !canAdd}
                 style={{
                   width: '100%',
-                  background: outOfStock || !canAdd ? '#ccc' : 'var(--ts-accent)',
+                  background: outOfStock || !canAdd ? '#ccc' : 'var(--ts-teal)',
                   border: 'none',
                   color: 'white',
                   fontWeight: 700,
@@ -218,8 +238,8 @@ function ProductDetail() {
                   <button style={{
                     width: '100%',
                     background: 'white',
-                    border: '2px solid var(--ts-primary)',
-                    color: 'var(--ts-primary)',
+                    border: '2px solid var(--ts-purple)',
+                    color: 'var(--ts-purple)',
                     fontWeight: 600,
                     padding: '0.75rem',
                     borderRadius: 8,
@@ -261,6 +281,21 @@ function ProductDetail() {
           </Row>
         </Container>
       </div>
+      {/* Productos relacionados */}
+      {relatedProducts.length > 0 && (
+        <div style={{ background: 'var(--ts-bg)', padding: '2.5rem 0' }}>
+          <Container>
+            <h2 className="section-title mb-4">Productos relacionados</h2>
+            <Row className="g-3">
+              {relatedProducts.map(p => (
+                <Col md={6} lg={3} key={p.id}>
+                  <ProductCard product={p} />
+                </Col>
+              ))}
+            </Row>
+          </Container>
+        </div>
+      )}
     </>
   );
 }

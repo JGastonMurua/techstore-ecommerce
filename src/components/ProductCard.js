@@ -1,10 +1,31 @@
 import React from 'react';
-import { FaShoppingCart, FaCheck } from 'react-icons/fa';
+import { FaShoppingCart, FaCheck, FaHeart, FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa';
 import { LinkContainer } from 'react-router-bootstrap';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
+
+const getMockRating = (id) => {
+  const hash = String(id).split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  return +(3.5 + (hash % 16) / 10).toFixed(1);
+};
+const getMockReviews = (id) => {
+  const hash = String(id).split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  return 20 + (hash % 180);
+};
+const renderStars = (rating) => {
+  const full = Math.floor(rating);
+  const half = rating % 1 >= 0.5;
+  const empty = 5 - full - (half ? 1 : 0);
+  return [
+    ...[...Array(full)].map((_, i) => <FaStar key={`f${i}`} />),
+    ...(half ? [<FaStarHalfAlt key="h" />] : []),
+    ...[...Array(empty)].map((_, i) => <FaRegStar key={`e${i}`} />),
+  ];
+};
 
 function ProductCard({ product }) {
   const { addToCart, isInCart, getItemQuantity } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   const handleAddToCart = () => {
     const currentQuantity = getItemQuantity(product.id);
@@ -25,6 +46,9 @@ function ProductCard({ product }) {
   const availableStock = product.stock || 0;
   const canAddMore = currentQuantity < availableStock;
   const outOfStock = availableStock === 0;
+  const inWishlist = isInWishlist(product.id);
+  const rating = product.rating || getMockRating(product.id);
+  const reviews = product.reviews || getMockReviews(product.id);
 
   return (
     <div className="product-card">
@@ -37,6 +61,13 @@ function ProductCard({ product }) {
           alt={product.nombre}
           className="product-image w-100"
         />
+        <button
+          className={`wishlist-btn ${inWishlist ? 'active' : ''}`}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product); }}
+          title={inWishlist ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+        >
+          <FaHeart size={13} />
+        </button>
         {availableStock <= 5 && availableStock > 0 && (
           <span
             className="badge-stock-low position-absolute"
@@ -71,6 +102,12 @@ function ProductCard({ product }) {
           </small>
         )}
 
+        {/* Rating */}
+        <div className="star-rating">
+          {renderStars(rating)}
+          <span className="review-count">({reviews})</span>
+        </div>
+
         {/* Nombre */}
         <LinkContainer to={`/producto/${product.id}`}>
           <p className="product-name mb-1" style={{ cursor: 'pointer' }}>{product.nombre}</p>
@@ -93,7 +130,7 @@ function ProductCard({ product }) {
 
         {/* Cantidad en carrito */}
         {currentQuantity > 0 && (
-          <small style={{ color: 'var(--ts-primary)', fontWeight: 600, fontSize: '0.8rem' }}>
+          <small style={{ color: 'var(--ts-purple)', fontWeight: 600, fontSize: '0.8rem' }}>
             <FaCheck size={10} className="me-1" />
             {currentQuantity} en tu carrito
           </small>

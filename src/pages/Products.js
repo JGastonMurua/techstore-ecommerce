@@ -18,7 +18,11 @@ function Products() {
     searchTerm,
     selectedCategory,
     setSearchTerm,
-    setCurrentPage
+    setCurrentPage,
+    sortOrder,
+    setSortOrder,
+    onlyInStock,
+    setOnlyInStock,
   } = useProducts();
 
   const [searchParams] = useSearchParams();
@@ -69,9 +73,39 @@ function Products() {
 
       <Container className="py-4">
         {/* Barra de busqueda */}
-        <Row className="mb-4">
+        <Row className="mb-2">
           <Col>
             <SearchBar />
+          </Col>
+        </Row>
+
+        {/* Ordenamiento y filtros */}
+        <Row className="mb-4">
+          <Col>
+            <div className="sort-bar">
+              <span className="sort-label">Ordenar:</span>
+              {[
+                { label: 'Relevancia', value: 'default' },
+                { label: 'Menor precio', value: 'price-asc' },
+                { label: 'Mayor precio', value: 'price-desc' },
+              ].map(opt => (
+                <button
+                  key={opt.value}
+                  className={`sort-btn ${sortOrder === opt.value ? 'active' : ''}`}
+                  onClick={() => { setSortOrder(opt.value); setCurrentPage(1); }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+              <label className="stock-filter">
+                <input
+                  type="checkbox"
+                  checked={onlyInStock}
+                  onChange={(e) => { setOnlyInStock(e.target.checked); setCurrentPage(1); }}
+                />
+                Solo con stock
+              </label>
+            </div>
           </Col>
         </Row>
 
