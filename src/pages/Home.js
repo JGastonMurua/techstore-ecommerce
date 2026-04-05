@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
-import { FaLaptop, FaMobile, FaTabletAlt, FaHeadphones, FaShoppingBag, FaCog, FaTruck, FaLock, FaHeadset } from 'react-icons/fa';
+import { FaLaptop, FaShoppingBag, FaCog, FaTruck, FaLock, FaHeadset } from 'react-icons/fa';
 import { Helmet } from 'react-helmet';
 import { useProducts } from '../context/ProductContext';
 import { useAuth } from '../context/AuthContext';
