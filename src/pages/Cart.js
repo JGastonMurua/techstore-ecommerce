@@ -9,7 +9,6 @@ function Cart() {
   const {
     cartItems,
     removeFromCart,
-    updateQuantity,
     incrementQuantity,
     decrementQuantity,
     clearCart,

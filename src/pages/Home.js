@@ -14,13 +14,6 @@ function Home() {
 
   const featuredProducts = products.slice(0, 4);
 
-  const categories = [
-    { name: 'Laptops',      icon: FaLaptop,    slug: 'laptops' },
-    { name: 'Smartphones',  icon: FaMobile,    slug: 'smartphones' },
-    { name: 'Tablets',      icon: FaTabletAlt, slug: 'tablets' },
-    { name: 'Accesorios',   icon: FaHeadphones,slug: 'accesorios' },
-  ];
-
   const ventajas = [
     { icon: FaTruck,   title: 'Envio Gratis',   desc: 'En compras superiores a $50.000' },
     { icon: FaLock,    title: 'Pago Seguro',     desc: 'Transacciones 100% seguras' },

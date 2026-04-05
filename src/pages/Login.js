@@ -3,7 +3,7 @@ import { Container, Row, Col, Card, Form, Button, Alert, Spinner } from 'react-b
 import { FaSignInAlt, FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
-import { useAuth, DemoUsers } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 function Login() {
   const [formData, setFormData] = useState({

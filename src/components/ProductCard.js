@@ -25,7 +25,7 @@ const renderStars = (rating) => {
 };
 
 function ProductCard({ product }) {
-  const { addToCart, isInCart, getItemQuantity } = useCart();
+  const { addToCart, getItemQuantity } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
   const handleAddToCart = () => {
