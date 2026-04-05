@@ -6,7 +6,7 @@ import { useProducts } from '../context/ProductContext';
 import SearchBar from '../components/SearchBar';
 import ProductCard from '../components/ProductCard';
 import CustomPagination from '../components/Pagination';
-import Loading, { NoProducts, ProductSkeleton } from '../components/Loading';
+import { NoProducts, ProductSkeleton } from '../components/Loading';
 
 function Products() {
   const {

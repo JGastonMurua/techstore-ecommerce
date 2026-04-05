@@ -12,7 +12,7 @@ function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { products, loading } = useProducts();
-  const { addToCart, isInCart, getItemQuantity } = useCart();
+  const { addToCart, getItemQuantity } = useCart();
   const [product, setProduct] = useState(null);
 
   useEffect(() => {
@@ -85,9 +85,9 @@ function ProductDetail() {
       <div style={{ background: 'white', borderBottom: '1px solid var(--ts-border)', padding: '0.6rem 0' }}>
         <Container>
           <nav style={{ fontSize: '0.82rem', color: 'var(--ts-text-muted)' }}>
-            <LinkContainer to="/"><a style={{ color: 'var(--ts-purple)', textDecoration: 'none' }}>Inicio</a></LinkContainer>
+            <LinkContainer to="/"><a href="/" style={{ color: 'var(--ts-purple)', textDecoration: 'none' }}>Inicio</a></LinkContainer>
             <span className="mx-2">›</span>
-            <LinkContainer to="/productos"><a style={{ color: 'var(--ts-purple)', textDecoration: 'none' }}>Productos</a></LinkContainer>
+            <LinkContainer to="/productos"><a href="/productos" style={{ color: 'var(--ts-purple)', textDecoration: 'none' }}>Productos</a></LinkContainer>
             {product.categoria && (
               <>
                 <span className="mx-2">›</span>
