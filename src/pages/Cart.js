@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
-import { Container, Row, Col, Button, Spinner } from 'react-bootstrap';
+import React from 'react';
+import { Container, Row, Col, Button } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import { FaTrash, FaPlus, FaMinus, FaShoppingBag, FaArrowLeft, FaCreditCard, FaLock, FaTruck, FaUndo } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
-import { useProducts } from '../context/ProductContext';
-import { toast } from 'react-toastify';
 
 function Cart() {
   const {
@@ -18,9 +16,6 @@ function Cart() {
     getTotalPrice
   } = useCart();
 
-  const { loadProducts } = useProducts();
-  const [processingPayment, setProcessingPayment] = useState(false);
-
   const totalItems = getTotalItems();
   const totalPrice = getTotalPrice();
   const shippingCost = totalPrice > 50000 ? 0 : 5000;
@@ -32,58 +27,6 @@ function Cart() {
       currency: 'ARS',
       maximumFractionDigits: 0
     }).format(price);
-  };
-
-  const handleProceedToPayment = async () => {
-    if (cartItems.length === 0) {
-      toast.error('El carrito esta vacio');
-      return;
-    }
-
-    setProcessingPayment(true);
-
-    try {
-      const stockErrors = [];
-      for (const item of cartItems) {
-        if (item.quantity > (item.stock || 0)) {
-          stockErrors.push(`${item.nombre} - Stock insuficiente`);
-        }
-      }
-
-      if (stockErrors.length > 0) {
-        toast.error(`Stock insuficiente: ${stockErrors.join(', ')}`);
-        setProcessingPayment(false);
-        return;
-      }
-
-      const { productAPI } = await import('../services/api');
-
-      for (const item of cartItems) {
-        try {
-          const productResponse = await productAPI.getById(item.id);
-          const currentProduct = productResponse.data;
-          const currentStock = Number(currentProduct.stock) || 0;
-          const newStock = Math.max(0, currentStock - item.quantity);
-          await productAPI.update(item.id, { ...currentProduct, stock: newStock });
-        } catch (error) {
-          console.error(`Error actualizando ${item.nombre}:`, error);
-        }
-      }
-
-      clearCart();
-      await loadProducts();
-      toast.success('Redirigiendo a MercadoPago...');
-
-      setTimeout(() => {
-        window.location.href = 'https://www.mercadopago.com.ar/';
-      }, 1000);
-
-    } catch (error) {
-      console.error('Error procesando pago:', error);
-      toast.error('Error al procesar el pago. Intentalo de nuevo.');
-    } finally {
-      setProcessingPayment(false);
-    }
   };
 
   // Carrito vacio
@@ -249,23 +192,12 @@ function Cart() {
                 <span>{formatPrice(finalTotal)}</span>
               </div>
 
-              <button
-                className="btn-checkout"
-                onClick={handleProceedToPayment}
-                disabled={processingPayment}
-              >
-                {processingPayment ? (
-                  <>
-                    <Spinner animation="border" size="sm" className="me-2" />
-                    Procesando...
-                  </>
-                ) : (
-                  <>
-                    <FaCreditCard className="me-2" />
-                    Continuar compra
-                  </>
-                )}
-              </button>
+              <LinkContainer to="/checkout">
+                <button className="btn-checkout">
+                  <FaCreditCard className="me-2" />
+                  Continuar compra
+                </button>
+              </LinkContainer>
 
               {/* Garantias */}
               <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--ts-border)' }}>

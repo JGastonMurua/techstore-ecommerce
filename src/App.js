@@ -91,7 +91,7 @@ function App() {
 
               {/* WhatsApp flotante */}
               <a
-                href="https://wa.me/5491155555555"
+                href="https://wa.me/5491130484275"
                 className="whatsapp-float"
                 target="_blank"
                 rel="noreferrer"
