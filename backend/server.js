@@ -26,7 +26,10 @@ app.post('/api/send-email', async (req, res) => {
 
   console.log(`📤 Enviando email a: ${to_email}`);
   try {
-    await resend.emails.send({
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Resend timeout after 20s')), 20000)
+    );
+    const sendPromise = resend.emails.send({
       from:    'onboarding@resend.dev',
       to:      to_email,
       subject: `Pedido confirmado ${order_id} — TechStore`,
@@ -71,6 +74,7 @@ app.post('/api/send-email', async (req, res) => {
       `
     });
 
+    await Promise.race([sendPromise, timeoutPromise]);
     console.log('✅ Email enviado correctamente');
     res.json({ success: true, message: 'Email enviado correctamente' });
 
