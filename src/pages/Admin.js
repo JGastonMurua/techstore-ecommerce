@@ -1,21 +1,35 @@
-import React, { useState } from 'react';
-import { Container, Row, Col, Card, Button, Table, Badge, Alert, Image } from 'react-bootstrap';
-import { FaPlus, FaEdit, FaTrash, FaCog } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { Container, Row, Col, Card, Button, Table, Badge, Alert, Image, Nav } from 'react-bootstrap';
+import { FaPlus, FaEdit, FaTrash, FaCog, FaShoppingBag, FaBoxOpen } from 'react-icons/fa';
 import { Helmet } from 'react-helmet';
 import { useProducts } from '../context/ProductContext';
 import ProductForm from '../components/ProductForm';
 import ConfirmModal from '../components/ConfirmModal';
 import Loading from '../components/Loading';
+import { CONFIG } from '../config/cliente';
+
+const STATUS_LABELS = {
+  pending:        { label: 'Pendiente',        bg: 'warning'   },
+  approved:       { label: 'Aprobado',          bg: 'success'   },
+  rejected:       { label: 'Rechazado',         bg: 'danger'    },
+  pending_manual: { label: 'Pago manual',       bg: 'info'      },
+  cancelled:      { label: 'Cancelado',         bg: 'secondary' },
+};
 
 function Admin() {
-  const { 
-    products, 
-    loading, 
-    error, 
-    addProduct, 
-    updateProduct, 
-    deleteProduct 
+  const {
+    products,
+    loading,
+    error,
+    addProduct,
+    updateProduct,
+    deleteProduct
   } = useProducts();
+
+  const [activeTab, setActiveTab] = useState('products');
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState(null);
 
   // Estados para los modales
   const [showProductForm, setShowProductForm] = useState(false);
@@ -23,6 +37,25 @@ function Admin() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productToDelete, setProductToDelete] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
+
+  useEffect(() => {
+    if (activeTab === 'orders') fetchOrders();
+  }, [activeTab]);
+
+  const fetchOrders = async () => {
+    setOrdersLoading(true);
+    setOrdersError(null);
+    try {
+      const res = await fetch(`${CONFIG.backendUrl}/api/orders`);
+      if (!res.ok) throw new Error('Error al cargar órdenes');
+      const data = await res.json();
+      setOrders(data);
+    } catch (e) {
+      setOrdersError(e.message);
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
 
   // Formatear precio
   const formatPrice = (price) => {
@@ -111,15 +144,97 @@ function Admin() {
                 <FaCog className="me-2" />
                 Panel de Administración
               </h1>
-              <p className="mb-0 opacity-75">
-                Gestiona el catálogo de productos
-              </p>
+              <p className="mb-0 opacity-75">Gestiona productos y órdenes</p>
             </Col>
           </Row>
         </Container>
       </div>
 
       <Container className="py-4">
+
+        {/* Tabs */}
+        <Nav variant="tabs" className="mb-4" activeKey={activeTab} onSelect={setActiveTab}>
+          <Nav.Item>
+            <Nav.Link eventKey="products" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <FaBoxOpen /> Productos
+            </Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link eventKey="orders" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <FaShoppingBag /> Órdenes
+              {orders.length > 0 && (
+                <Badge bg="primary" pill style={{ fontSize: '0.7rem' }}>{orders.length}</Badge>
+              )}
+            </Nav.Link>
+          </Nav.Item>
+        </Nav>
+
+        {/* ── TAB ÓRDENES ── */}
+        {activeTab === 'orders' && (
+          <Card>
+            <Card.Header className="d-flex justify-content-between align-items-center">
+              <h5 className="mb-0">Órdenes de compra</h5>
+              <Button variant="outline-secondary" size="sm" onClick={fetchOrders}>Actualizar</Button>
+            </Card.Header>
+            <Card.Body className="p-0">
+              {ordersLoading ? (
+                <Loading message="Cargando órdenes..." />
+              ) : ordersError ? (
+                <Alert variant="danger" className="m-3">{ordersError}</Alert>
+              ) : orders.length === 0 ? (
+                <div className="text-center py-5 text-muted">
+                  <FaShoppingBag size={40} style={{ opacity: 0.2, marginBottom: 12 }} />
+                  <p>Todavía no hay órdenes</p>
+                </div>
+              ) : (
+                <div className="table-responsive">
+                  <Table hover className="mb-0" style={{ fontSize: '0.85rem' }}>
+                    <thead className="table-light">
+                      <tr>
+                        <th>Orden</th>
+                        <th>Cliente</th>
+                        <th>Método</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th>Fecha</th>
+                        <th>Items</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orders.map(order => {
+                        const st = STATUS_LABELS[order.status] || { label: order.status, bg: 'secondary' };
+                        const items = Array.isArray(order.items) ? order.items : [];
+                        return (
+                          <tr key={order.id}>
+                            <td><strong>{order.order_id}</strong></td>
+                            <td>
+                              <div>{order.customer_name}</div>
+                              <small className="text-muted">{order.customer_email}</small>
+                            </td>
+                            <td style={{ textTransform: 'capitalize' }}>{order.payment_method}</td>
+                            <td><strong>{new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(order.total + (order.shipping || 0))}</strong></td>
+                            <td><Badge bg={st.bg}>{st.label}</Badge></td>
+                            <td>{new Date(order.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })}</td>
+                            <td>
+                              {items.map((item, i) => (
+                                <div key={i} style={{ whiteSpace: 'nowrap' }}>
+                                  {item.nombre} <span className="text-muted">x{item.quantity}</span>
+                                </div>
+                              ))}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </Table>
+                </div>
+              )}
+            </Card.Body>
+          </Card>
+        )}
+
+        {/* ── TAB PRODUCTOS ── */}
+        {activeTab === 'products' && <>
         {/* Header con estadísticas */}
         <Row className="mb-4">
           <Col md={8}>
@@ -277,6 +392,8 @@ function Admin() {
           </Card.Body>
         </Card>
       </Container>
+
+        </> /* fin tab productos */}
 
       {/* Modal para agregar/editar producto */}
       <ProductForm

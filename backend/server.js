@@ -4,11 +4,13 @@ const cors    = require('cors');
 const crypto  = require('crypto');
 const { Resend } = require('resend');
 const { MercadoPagoConfig, Preference } = require('mercadopago');
+const { createClient } = require('@supabase/supabase-js');
 
 const app    = express();
 const PORT   = process.env.PORT || 3001;
 const resend = new Resend(process.env.RESEND_API_KEY);
 const mpClient = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
 // ── CORS ──────────────────────────────────────────────────────
 app.use(cors({
@@ -90,7 +92,7 @@ app.post('/api/send-email', async (req, res) => {
 // ── Endpoint: crear preferencia MercadoPago ───────────────────
 app.post('/api/create-preference', async (req, res) => {
   console.log('💳 Creando preferencia MercadoPago');
-  const { items, payer, orderId, backUrl } = req.body;
+  const { items, payer, orderId, backUrl, orderData } = req.body;
   try {
     const preference = new Preference(mpClient);
     const result = await preference.create({
@@ -117,6 +119,28 @@ app.post('/api/create-preference', async (req, res) => {
       }
     });
     console.log('✅ Preferencia creada:', result.id);
+
+    // Guardar orden en Supabase con estado 'pending'
+    if (orderData) {
+      const { error: dbError } = await supabase.from('orders').insert([{
+        order_id:        orderId,
+        customer_name:   `${orderData.nombre} ${orderData.apellido}`,
+        customer_email:  orderData.email,
+        customer_phone:  orderData.telefono,
+        address:         orderData.direccion,
+        city:            orderData.ciudad,
+        province:        orderData.provincia,
+        payment_method:  'mercadopago',
+        total:           orderData.total,
+        shipping:        orderData.shipping,
+        status:          'pending',
+        mp_preference_id: result.id,
+        items:           items.map(i => ({ id: i.id, nombre: i.nombre, precio: i.precio, quantity: i.quantity })),
+      }]);
+      if (dbError) console.error('⚠️ Error guardando orden en BD:', dbError.message);
+      else console.log('💾 Orden guardada en BD:', orderId);
+    }
+
     res.json({
       id: result.id,
       init_point: result.init_point,
@@ -124,6 +148,49 @@ app.post('/api/create-preference', async (req, res) => {
     });
   } catch (error) {
     console.error('❌ Error creando preferencia MP:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ── Endpoint: guardar orden manual (transferencia / efectivo) ─
+app.post('/api/orders/manual', async (req, res) => {
+  const { orderId, orderData, items } = req.body;
+  if (!orderId || !orderData || !items) return res.status(400).json({ error: 'Datos incompletos' });
+  try {
+    const { error } = await supabase.from('orders').insert([{
+      order_id:       orderId,
+      customer_name:  `${orderData.nombre} ${orderData.apellido}`,
+      customer_email: orderData.email,
+      customer_phone: orderData.telefono,
+      address:        orderData.direccion,
+      city:           orderData.ciudad,
+      province:       orderData.provincia,
+      payment_method: orderData.metodoPago,
+      total:          orderData.total,
+      shipping:       orderData.shipping,
+      status:         'pending_manual',
+      items:          items.map(i => ({ id: i.id, nombre: i.nombre, precio: i.precio, quantity: i.quantity })),
+    }]);
+    if (error) throw error;
+    console.log('💾 Orden manual guardada:', orderId);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('❌ Error guardando orden manual:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ── Endpoint: listar órdenes (admin) ─────────────────────────
+app.get('/api/orders', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('❌ Error obteniendo órdenes:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
@@ -173,8 +240,19 @@ app.post('/api/webhook', async (req, res) => {
       const payment = await response.json();
       console.log(`💰 Pago ${data.id}: status=${payment.status}, external_ref=${payment.external_reference}`);
 
-      // TODO: cuando haya BD, actualizar estado de la orden aquí
-      // await db.updateOrder(payment.external_reference, payment.status);
+      // Actualizar estado de la orden en Supabase
+      if (payment.external_reference) {
+        const { error: dbError } = await supabase
+          .from('orders')
+          .update({
+            status:         payment.status,
+            mp_payment_id:  String(data.id),
+            updated_at:     new Date().toISOString(),
+          })
+          .eq('order_id', payment.external_reference);
+        if (dbError) console.error('⚠️ Error actualizando orden en BD:', dbError.message);
+        else console.log(`✅ Orden ${payment.external_reference} actualizada a: ${payment.status}`);
+      }
 
     } catch (error) {
       console.error('❌ Error verificando pago en webhook:', error.message);

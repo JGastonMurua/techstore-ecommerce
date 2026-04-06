@@ -90,6 +90,7 @@ function Checkout() {
           payer: { nombre: form.nombre, apellido: form.apellido, email: form.email },
           orderId: `TS-${orderId}`,
           backUrl: `${CONFIG.frontendUrl}/`,
+          orderData: { ...form, total, shipping },
         }),
       });
       const data = await res.json();
@@ -116,6 +117,20 @@ function Checkout() {
         return;
       }
       setSending(true);
+      // Guardar orden manual en BD
+      try {
+        await fetch(`${CONFIG.backendUrl}/api/orders/manual`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderId: `TS-${orderId}`,
+            orderData: { ...form, total, shipping },
+            items: cartItems,
+          }),
+        });
+      } catch (e) {
+        console.error('Error guardando orden manual:', e.message);
+      }
       await sendConfirmationEmail();
       setSending(false);
     }
