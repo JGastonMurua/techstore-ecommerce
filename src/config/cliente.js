@@ -23,7 +23,7 @@ export const CONFIG = {
     linkedin: 'https://linkedin.com/in/jgastonmurua',
   },
 
-  // Backend — reemplazá con la URL de Railway una vez deployado
+  // Backend — URL del backend en Render (configurar en .env como REACT_APP_BACKEND_URL)
   backendUrl: process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001',
 
   // Frontend — reemplazá con la URL de producción si cambia

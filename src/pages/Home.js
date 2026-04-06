@@ -30,7 +30,7 @@ function Home() {
       toast.error('El pago no se pudo procesar. Podés intentarlo de nuevo.');
       window.history.replaceState({}, '', window.location.pathname);
     }
-  }, []);
+  }, [clearCart]);
 
   const featuredProducts = products.slice(0, 4);
 
