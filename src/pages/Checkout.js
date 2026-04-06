@@ -25,6 +25,7 @@ function Checkout() {
     metodoPago: 'tarjeta', numeroTarjeta: '', vencimiento: '', cvv: ''
   });
   const [errors, setErrors] = useState({});
+  const [sending, setSending] = useState(false);
 
   const formatPrice = (price) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(price);
@@ -81,10 +82,15 @@ function Checkout() {
   };
 
   const handleNext = async () => {
+    if (sending) return;
     if (step === 1 && !validateStep1()) return;
     if (step === 2 && !validateStep2()) return;
     if (step === 3) { clearCart(); navigate('/'); return; }
-    if (step === 2) await sendConfirmationEmail();
+    if (step === 2) {
+      setSending(true);
+      await sendConfirmationEmail();
+      setSending(false);
+    }
     setStep(s => s + 1);
   };
 
@@ -304,7 +310,7 @@ function Checkout() {
                 onClick={handleNext}
                 style={{ background: 'var(--ts-teal)', border: 'none', color: 'white', padding: '0.7rem 2rem', borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem', marginLeft: 'auto' }}
               >
-                {step === 3 ? 'Volver a la tienda' : step === 2 ? 'Confirmar pedido' : 'Continuar'}
+                {step === 3 ? 'Volver a la tienda' : step === 2 ? (sending ? 'Enviando...' : 'Confirmar pedido') : 'Continuar'}
               </button>
             </div>
           </Col>

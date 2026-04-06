@@ -38,6 +38,7 @@ jobs:
         CI: false
         GENERATE_SOURCEMAP: false
         PUBLIC_URL: /techstore-ecommerce
+        REACT_APP_BACKEND_URL: ${{ secrets.REACT_APP_BACKEND_URL }}
         
     - name: Setup Pages
       uses: actions/configure-pages@v4
