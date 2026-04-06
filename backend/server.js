@@ -27,10 +27,12 @@ const transporter = nodemailer.createTransport({
 
 // ── Endpoint: enviar email de confirmacion ────────────────────
 app.post('/api/send-email', async (req, res) => {
+  console.log('📧 Peticion recibida en /api/send-email');
   const { to_name, to_email, order_id, order_total, delivery_address, payment_method } = req.body;
 
   if (!to_email) return res.status(400).json({ error: 'Email requerido' });
 
+  console.log(`📤 Enviando email a: ${to_email}`);
   try {
     await transporter.sendMail({
       from:    process.env.EMAIL_FROM || `TechStore <${process.env.EMAIL_USER}>`,

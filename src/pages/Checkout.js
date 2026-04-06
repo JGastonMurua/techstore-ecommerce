@@ -34,9 +34,12 @@ function Checkout() {
     const total = getTotalPrice();
     const shipping = total > CONFIG.envioGratisDesde ? 0 : CONFIG.costoEnvio;
     try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 12000);
       const res = await fetch(`${CONFIG.backendUrl}/api/send-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           to_name:          `${form.nombre} ${form.apellido}`,
           to_email:         form.email,
@@ -46,9 +49,10 @@ function Checkout() {
           payment_method:   form.metodoPago,
         })
       });
+      clearTimeout(timeout);
       if (res.ok) setEmailSent(true);
     } catch (error) {
-      console.error('Error enviando email de confirmacion:', error);
+      console.error('Error enviando email:', error.name, error.message);
       setEmailSent(false);
     }
   };
