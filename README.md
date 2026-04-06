@@ -1,104 +1,118 @@
-# TechStore - E-commerce de Tecnologia
+# TechStore — E-commerce React
 
-> Proyecto Final - Curso de React - Talento Tech
+Tienda online de tecnología lista para vender a clientes. Frontend en React, backend en Node.js para envío de emails de confirmación.
 
-E-commerce completo de productos tecnologicos desarrollado con React, con CRUD, autenticacion, carrito de compras y panel de administracion.
+**Demo:** https://jgastonmurua.github.io/techstore-ecommerce
 
-## Informacion del Proyecto
+---
 
-- **Alumno:** Gaston Murua
-- **Profesor:** Nicolas Fernandez ([nmfernandez1982](https://github.com/nmfernandez1982))
-- **Institucion:** Talento Tech
-- **Modalidad:** Virtual
-- **Duracion:** 1 Cuatrimestre
-- **Tipo:** Proyecto Individual
+## Stack
 
-## Demo en Vivo
+- **Frontend:** React 18, React Bootstrap, React Router v6, Context API
+- **Backend:** Node.js + Express + Resend (emails)
+- **Deploy frontend:** GitHub Pages (automático con GitHub Actions)
+- **Deploy backend:** Render.com (free tier)
+- **Datos:** MockAPI (productos)
 
-[Ver TechStore en funcionamiento](https://jgastonmurua.github.io/techstore-ecommerce/)
+---
 
-## Tecnologias Utilizadas
+## Para adaptar a un nuevo cliente
 
-### Frontend
-- **React 18** - Biblioteca principal
-- **React Router DOM 6** - Navegacion entre paginas
-- **React Bootstrap 2** - Componentes UI responsivos
-- **React Icons 4** - Iconografia
-- **React Helmet 6** - Gestion de meta tags
-- **React Toastify 9** - Notificaciones
+Solo hay que modificar **un archivo**: `src/config/cliente.js`
 
-### Backend y API
-- **MockAPI** - API REST para desarrollo
-- **Axios** - Cliente HTTP
-
-### Estilos
-- **Bootstrap 5** - Framework CSS responsivo
-- **CSS Custom** - Estilos personalizados
-
-## Arquitectura del Proyecto
-
-```
-src/
-├── components/
-│   ├── ConfirmModal.js
-│   ├── Loading.js
-│   ├── Navbar.js
-│   ├── Pagination.js
-│   ├── ProductCard.js
-│   ├── ProductForm.js
-│   ├── ProtectedRoute.js
-│   └── SearchBar.js
-├── context/
-│   ├── AuthContext.js
-│   ├── CartContext.js
-│   └── ProductContext.js
-├── pages/
-│   ├── Admin.js
-│   ├── Cart.js
-│   ├── Home.js
-│   ├── Login.js
-│   ├── Products.js
-│   ├── Register.js
-│   └── UserDashboard.js
-├── services/
-│   └── api.js
-└── App.js
+```js
+export const CONFIG = {
+  nombreTienda: 'NombreDeLaTienda',
+  emailContacto: 'email@delcliente.com',
+  whatsapp: '549XXXXXXXXXX',       // Código de país + número sin espacios
+  envioGratisDesde: 50000,         // Monto mínimo para envío gratis
+  costoEnvio: 5000,
+  redes: {
+    email: 'email@delcliente.com',
+    github: 'https://github.com/...',
+    linkedin: 'https://linkedin.com/in/...',
+  },
+  backendUrl: process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001',
+};
 ```
 
-## Funcionalidades
+---
 
-### Para Usuarios
-- Catalogo de productos con busqueda y filtros
-- Carrito de compras con persistencia en localStorage
-- Sistema de autenticacion (login/registro)
-- Dashboard personal con informacion de cuenta
-- Gestion de stock en tiempo real
-- Proceso de compra con integracion a MercadoPago
+## Checklist para nuevo cliente
 
-### Para Administradores
-- CRUD completo de productos
-- Panel de administracion con estadisticas
-- Gestion de inventario con alertas de stock
+### 1. Frontend
+- [ ] Editar `src/config/cliente.js` con los datos del cliente
+- [ ] Reemplazar logo/favicon en `public/index.html`
+- [ ] Actualizar meta tags OG (título, descripción, URL) en `public/index.html`
+- [ ] Cambiar colores en `src/App.css` (variables `--ts-purple`, `--ts-teal`)
+- [ ] Actualizar `src/components/Footer.js` con datos del cliente
 
-## Instalacion
+### 2. Backend de emails
+- [ ] Crear cuenta en **resend.com**
+- [ ] Verificar el dominio del cliente en Resend (para que emails no vayan a spam)
+- [ ] Crear API Key en Resend
+- [ ] Agregar variable `RESEND_API_KEY` en Render
+- [ ] Cambiar `from` en `backend/server.js` al email del dominio verificado
+
+### 3. Deploy
+- [ ] Hacer fork o clonar el repo para el cliente
+- [ ] Conectar a GitHub Pages (o Vercel/Netlify)
+- [ ] Deploy del backend en Render.com (root directory: `backend`, start: `node server.js`)
+- [ ] Agregar secret `REACT_APP_BACKEND_URL` en GitHub Actions con la URL del backend
+- [ ] Agregar productos en MockAPI (o conectar a base de datos real)
+
+---
+
+## Variables de entorno
+
+### Frontend (GitHub → Settings → Secrets → Actions)
+| Variable | Descripción |
+|---|---|
+| `REACT_APP_BACKEND_URL` | URL del backend (ej: https://xxx.onrender.com) |
+
+### Backend (Render → Environment)
+| Variable | Descripción |
+|---|---|
+| `RESEND_API_KEY` | API Key de resend.com |
+
+---
+
+## Desarrollo local
 
 ```bash
-git clone https://github.com/JGastonMurua/techstore-ecommerce.git
-cd techstore-ecommerce
+# Frontend
 npm install
 npm start
+
+# Backend
+cd backend
+npm install
+node server.js
 ```
 
-## Credenciales de Prueba
+Para el backend local, crear `backend/.env`:
+```
+RESEND_API_KEY=re_xxxxxxxxxxxx
+PORT=3001
+```
 
-| Rol | Email | Password |
-|-----|-------|----------|
-| Admin | admin@techstore.com | admin123 |
-| Usuario | usuario@techstore.com | user123 |
-| Demo | demo@demo.com | demo123 |
+---
 
-## Contacto
+## Estructura
 
-**Gaston Murua**
-- GitHub: [@JGastonMurua](https://github.com/JGastonMurua)
-- Email: gastton.murua@gmail.com
+```
+/
+├── src/
+│   ├── config/cliente.js      <- ÚNICO archivo a editar por cliente
+│   ├── pages/
+│   ├── components/
+│   └── context/
+├── backend/
+│   ├── server.js              <- Servidor de emails (Resend)
+│   └── package.json
+└── public/
+```
+
+---
+
+Desarrollado por [Gaston Murua](https://linkedin.com/in/jgastonmurua) — Talento Tech 2025
