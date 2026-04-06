@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors    = require('cors');
+const crypto  = require('crypto');
 const { Resend } = require('resend');
 const { MercadoPagoConfig, Preference } = require('mercadopago');
 
@@ -125,6 +126,63 @@ app.post('/api/create-preference', async (req, res) => {
     console.error('❌ Error creando preferencia MP:', error.message);
     res.status(500).json({ error: error.message });
   }
+});
+
+// ── Helpers webhook ───────────────────────────────────────────
+function verificarFirmaMP(req) {
+  const secret = process.env.MP_WEBHOOK_SECRET;
+  if (!secret) return true; // si no configuraron secret, no bloquear (dev sin clave)
+
+  const xSignature = req.headers['x-signature'];
+  const xRequestId = req.headers['x-request-id'];
+  const dataId     = req.query['data.id'];
+
+  if (!xSignature) return false;
+
+  // MP firma con: "id:{data.id};request-id:{x-request-id};"
+  const manifest = `id:${dataId};request-id:${xRequestId};`;
+  const parts     = xSignature.split(',');
+  const sigPart   = parts.find(p => p.startsWith('v1='));
+  if (!sigPart) return false;
+
+  const receivedHash = sigPart.split('=')[1];
+  const expectedHash = crypto.createHmac('sha256', secret).update(manifest).digest('hex');
+  return crypto.timingSafeEqual(Buffer.from(receivedHash), Buffer.from(expectedHash));
+}
+
+// ── Endpoint: webhook MercadoPago ─────────────────────────────
+// MP notifica aquí los cambios de estado de pago (approved, rejected, etc.)
+// Configurar la URL en https://www.mercadopago.com.ar/developers/panel/notifications
+app.post('/api/webhook', async (req, res) => {
+  // En modo productivo validar firma; en test/simulación MP no la envía
+  const isLiveMode = req.body?.live_mode === true;
+  if (isLiveMode && !verificarFirmaMP(req)) {
+    console.warn('⚠️  Webhook rechazado: firma inválida');
+    return res.sendStatus(401);
+  }
+
+  const { type, data, action } = req.body;
+  console.log(`🔔 Webhook MP recibido — type: ${type}, action: ${action}`);
+
+  if (type === 'payment' && data?.id) {
+    try {
+      // Verificar el pago directamente con la API de MP (no confiar solo en el webhook)
+      const response = await fetch(`https://api.mercadopago.com/v1/payments/${data.id}`, {
+        headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` },
+      });
+      const payment = await response.json();
+      console.log(`💰 Pago ${data.id}: status=${payment.status}, external_ref=${payment.external_reference}`);
+
+      // TODO: cuando haya BD, actualizar estado de la orden aquí
+      // await db.updateOrder(payment.external_reference, payment.status);
+
+    } catch (error) {
+      console.error('❌ Error verificando pago en webhook:', error.message);
+    }
+  }
+
+  // Siempre responder 200 para que MP no reintente
+  res.sendStatus(200);
 });
 
 // ── Health check ─────────────────────────────────────────────

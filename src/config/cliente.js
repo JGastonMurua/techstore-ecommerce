@@ -26,4 +26,7 @@ export const CONFIG = {
   // Backend — reemplazá con la URL de Railway una vez deployado
   backendUrl: process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001',
 
+  // Frontend — reemplazá con la URL de producción si cambia
+  frontendUrl: process.env.REACT_APP_FRONTEND_URL || 'https://jgastonmurua.github.io/techstore-ecommerce',
+
 };

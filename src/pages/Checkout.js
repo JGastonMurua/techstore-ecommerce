@@ -26,6 +26,7 @@ function Checkout() {
   });
   const [errors, setErrors] = useState({});
   const [sending, setSending] = useState(false);
+  const [mpError, setMpError] = useState(null);
 
   const formatPrice = (price) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(price);
@@ -79,6 +80,7 @@ function Checkout() {
 
   const payWithMercadoPago = async () => {
     setSending(true);
+    setMpError(null);
     try {
       const res = await fetch(`${CONFIG.backendUrl}/api/create-preference`, {
         method: 'POST',
@@ -87,18 +89,19 @@ function Checkout() {
           items: cartItems,
           payer: { nombre: form.nombre, apellido: form.apellido, email: form.email },
           orderId: `TS-${orderId}`,
-          backUrl: 'https://jgastonmurua.github.io/techstore-ecommerce/',
+          backUrl: `${CONFIG.frontendUrl}/`,
         }),
       });
       const data = await res.json();
       if (data.sandbox_init_point) {
-        clearCart();
+        // No limpiar el carrito acá — se limpia en Home cuando MP confirma pago aprobado
         window.location.href = data.sandbox_init_point;
       } else {
-        throw new Error('No se recibio URL de pago');
+        throw new Error(data.error || 'No se recibio URL de pago');
       }
     } catch (error) {
       console.error('Error iniciando pago MP:', error.message);
+      setMpError('No pudimos conectar con Mercado Pago. Intentá de nuevo en unos segundos.');
       setSending(false);
     }
   };
@@ -242,6 +245,12 @@ function Checkout() {
                   <div style={{ background: '#f0faf9', border: '1px solid var(--ts-teal)', borderRadius: 8, padding: '0.85rem 1rem', fontSize: '0.83rem', color: 'var(--ts-text-muted)', display: 'flex', alignItems: 'center', gap: 8 }}>
                     <FaLock size={12} style={{ color: 'var(--ts-teal)', flexShrink: 0 }} />
                     Al confirmar, seras redirigido a Mercado Pago para completar el pago de forma segura.
+                  </div>
+                )}
+
+                {mpError && (
+                  <div style={{ background: '#fff5f5', border: '1px solid #fc8181', borderRadius: 8, padding: '0.75rem 1rem', fontSize: '0.83rem', color: '#c53030', marginTop: '0.75rem' }}>
+                    {mpError}
                   </div>
                 )}
 

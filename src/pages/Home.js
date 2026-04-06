@@ -5,6 +5,7 @@ import { FaLaptop, FaShoppingBag, FaCog, FaTruck, FaLock, FaHeadset } from 'reac
 import { Helmet } from 'react-helmet';
 import { useProducts } from '../context/ProductContext';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import ProductCard from '../components/ProductCard';
 import Loading from '../components/Loading';
 import { toast } from 'react-toastify';
@@ -12,12 +13,14 @@ import { toast } from 'react-toastify';
 function Home() {
   const { products, loading } = useProducts();
   const { isAuthenticated, isAdmin, userName } = useAuth();
+  const { clearCart } = useCart();
 
   // Detectar retorno de MercadoPago
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const status = params.get('status');
     if (status === 'approved') {
+      clearCart(); // Solo limpiar carrito cuando MP confirma pago exitoso
       toast.success('¡Pago aprobado! Tu pedido está en camino.');
       window.history.replaceState({}, '', window.location.pathname);
     } else if (status === 'pending') {
