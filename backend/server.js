@@ -1,12 +1,13 @@
 require('dotenv').config();
-const express   = require('express');
-const cors      = require('cors');
-const nodemailer = require('nodemailer');
+const express = require('express');
+const cors    = require('cors');
+const { Resend } = require('resend');
 
-const app  = express();
-const PORT = process.env.PORT || 3001;
+const app    = express();
+const PORT   = process.env.PORT || 3001;
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-// ── CORS: permitir el frontend de GitHub Pages y localhost ──
+// ── CORS ──────────────────────────────────────────────────────
 app.use(cors({
   origin: [
     'https://jgastonmurua.github.io',
@@ -15,15 +16,6 @@ app.use(cors({
   ]
 }));
 app.use(express.json());
-
-// ── Transporter Nodemailer (Gmail con App Password) ──────────
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,   // App Password de Google, no la contraseña normal
-  }
-});
 
 // ── Endpoint: enviar email de confirmacion ────────────────────
 app.post('/api/send-email', async (req, res) => {
@@ -34,8 +26,8 @@ app.post('/api/send-email', async (req, res) => {
 
   console.log(`📤 Enviando email a: ${to_email}`);
   try {
-    await transporter.sendMail({
-      from:    process.env.EMAIL_FROM || `TechStore <${process.env.EMAIL_USER}>`,
+    await resend.emails.send({
+      from:    'onboarding@resend.dev',
       to:      to_email,
       subject: `Pedido confirmado ${order_id} — TechStore`,
       html: `
@@ -79,10 +71,11 @@ app.post('/api/send-email', async (req, res) => {
       `
     });
 
+    console.log('✅ Email enviado correctamente');
     res.json({ success: true, message: 'Email enviado correctamente' });
 
   } catch (error) {
-    console.error('Error enviando email:', error.message);
+    console.error('❌ Error enviando email:', error.message);
     res.status(500).json({ error: 'Error al enviar email', detail: error.message });
   }
 });
