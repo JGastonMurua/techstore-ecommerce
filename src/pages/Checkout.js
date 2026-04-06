@@ -32,8 +32,6 @@ function Checkout() {
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(price);
 
   const sendConfirmationEmail = async () => {
-    const total = getTotalPrice();
-    const shipping = total > CONFIG.envioGratisDesde ? 0 : CONFIG.costoEnvio;
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 12000);
@@ -143,7 +141,7 @@ function Checkout() {
   }
 
   const total = getTotalPrice();
-  const shipping = total > 50000 ? 0 : 5000;
+  const shipping = total > CONFIG.envioGratisDesde ? 0 : CONFIG.costoEnvio;
 
   return (
     <>

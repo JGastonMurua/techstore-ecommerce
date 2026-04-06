@@ -107,7 +107,9 @@ app.post('/api/create-preference', async (req, res) => {
         payer: {
           name: payer.nombre,
           surname: payer.apellido,
-          email: payer.email,
+          // En sandbox MP el payer email NO puede ser el mismo que el vendedor.
+          // Usá el email de tu usuario test COMPRADOR de MP (crealo en developers/panel/test-users)
+          email: process.env.MP_TEST_BUYER_EMAIL || payer.email,
         },
         back_urls: {
           success: backUrl,

@@ -28,8 +28,6 @@ export function ProductProvider({ children }) {
             setLoading(true);
             setError(null);
             const response = await productAPI.getAll();
-            console.log('📦 Productos cargados desde API:', response.data);
-            console.log('🆔 IDs disponibles:', response.data.map(p => `${p.id} (${typeof p.id})`));
             setProducts(response.data);
         } catch (err) {
             setError('Error al cargar productos');
@@ -51,7 +49,6 @@ export function ProductProvider({ children }) {
 
             setLoading(true);
             const response = await productAPI.create(productData);
-            console.log('✅ Producto creado:', response.data);
 
             // Recargar productos para asegurar sincronización
             await loadProducts();
@@ -78,12 +75,7 @@ export function ProductProvider({ children }) {
 
             setLoading(true);
 
-            // NO convertir el ID - usar tal como viene
-            console.log('🔄 Actualizando producto con ID:', id, 'tipo:', typeof id);
-            console.log('📝 Datos a actualizar:', productData);
-
             const response = await productAPI.update(id, productData);
-            console.log('✅ Producto actualizado:', response.data);
 
             // Recargar productos para asegurar sincronización
             await loadProducts();
@@ -104,9 +96,6 @@ export function ProductProvider({ children }) {
         try {
             setLoading(true);
             const stringId = String(id);
-
-            console.log('🗑️ Eliminando producto con ID:', stringId, 'tipo:', typeof stringId);
-
             await productAPI.delete(stringId);
 
             setProducts(prev => prev.filter(product => product.id !== stringId));
@@ -116,7 +105,7 @@ export function ProductProvider({ children }) {
 
         } catch (err) {
             toast.error('Error al eliminar producto');
-            console.error('❌ Error completo:', err);
+            console.error(err);
             return false;
 
         } finally {
