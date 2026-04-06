@@ -2,10 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const cors    = require('cors');
 const { Resend } = require('resend');
+const { MercadoPagoConfig, Preference } = require('mercadopago');
 
 const app    = express();
 const PORT   = process.env.PORT || 3001;
 const resend = new Resend(process.env.RESEND_API_KEY);
+const mpClient = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
 
 // ── CORS ──────────────────────────────────────────────────────
 app.use(cors({
@@ -81,6 +83,47 @@ app.post('/api/send-email', async (req, res) => {
   } catch (error) {
     console.error('❌ Error enviando email:', error.message);
     res.status(500).json({ error: 'Error al enviar email', detail: error.message });
+  }
+});
+
+// ── Endpoint: crear preferencia MercadoPago ───────────────────
+app.post('/api/create-preference', async (req, res) => {
+  console.log('💳 Creando preferencia MercadoPago');
+  const { items, payer, orderId, backUrl } = req.body;
+  try {
+    const preference = new Preference(mpClient);
+    const result = await preference.create({
+      body: {
+        items: items.map(item => ({
+          id: String(item.id),
+          title: item.nombre,
+          quantity: Number(item.quantity),
+          unit_price: Number(item.precio),
+          currency_id: 'ARS',
+        })),
+        payer: {
+          name: payer.nombre,
+          surname: payer.apellido,
+          email: payer.email,
+        },
+        back_urls: {
+          success: backUrl,
+          failure: backUrl,
+          pending: backUrl,
+        },
+        auto_return: 'approved',
+        external_reference: orderId,
+      }
+    });
+    console.log('✅ Preferencia creada:', result.id);
+    res.json({
+      id: result.id,
+      init_point: result.init_point,
+      sandbox_init_point: result.sandbox_init_point,
+    });
+  } catch (error) {
+    console.error('❌ Error creando preferencia MP:', error.message);
+    res.status(500).json({ error: error.message });
   }
 });
 

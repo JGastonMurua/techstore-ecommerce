@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Form } from 'react-bootstrap';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
-import { FaCheck, FaShoppingCart, FaMapMarkerAlt, FaCreditCard, FaLock, FaEnvelope } from 'react-icons/fa';
+import { FaCheck, FaShoppingCart, FaMapMarkerAlt, FaCreditCard, FaLock, FaEnvelope, FaUniversity, FaMoneyBillWave } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { CONFIG } from '../config/cliente';
@@ -22,7 +22,7 @@ function Checkout() {
     email: user?.email || '',
     telefono: '',
     direccion: '', ciudad: '', provincia: '',
-    metodoPago: 'tarjeta', numeroTarjeta: '', vencimiento: '', cvv: ''
+    metodoPago: 'mercadopago'
   });
   const [errors, setErrors] = useState({});
   const [sending, setSending] = useState(false);
@@ -75,22 +75,43 @@ function Checkout() {
     return Object.keys(e).length === 0;
   };
 
-  const validateStep2 = () => {
-    if (form.metodoPago !== 'tarjeta') return true;
-    const e = {};
-    if (form.numeroTarjeta.replace(/\s/g, '').length < 16) e.numeroTarjeta = 'Numero invalido';
-    if (!form.vencimiento.trim()) e.vencimiento = 'Requerido';
-    if (form.cvv.length < 3) e.cvv = 'CVV invalido';
-    setErrors(e);
-    return Object.keys(e).length === 0;
+  const validateStep2 = () => true;
+
+  const payWithMercadoPago = async () => {
+    setSending(true);
+    try {
+      const res = await fetch(`${CONFIG.backendUrl}/api/create-preference`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: cartItems,
+          payer: { nombre: form.nombre, apellido: form.apellido, email: form.email },
+          orderId: `TS-${orderId}`,
+          backUrl: 'https://jgastonmurua.github.io/techstore-ecommerce/',
+        }),
+      });
+      const data = await res.json();
+      if (data.sandbox_init_point) {
+        clearCart();
+        window.location.href = data.sandbox_init_point;
+      } else {
+        throw new Error('No se recibio URL de pago');
+      }
+    } catch (error) {
+      console.error('Error iniciando pago MP:', error.message);
+      setSending(false);
+    }
   };
 
   const handleNext = async () => {
     if (sending) return;
     if (step === 1 && !validateStep1()) return;
-    if (step === 2 && !validateStep2()) return;
     if (step === 3) { clearCart(); navigate('/'); return; }
     if (step === 2) {
+      if (form.metodoPago === 'mercadopago') {
+        await payWithMercadoPago();
+        return;
+      }
       setSending(true);
       await sendConfirmationEmail();
       setSending(false);
@@ -192,11 +213,11 @@ function Checkout() {
                   <FaCreditCard style={{ color: 'var(--ts-teal)' }} /> Metodo de pago
                 </h5>
 
-                <div className="d-flex flex-column gap-2 mb-4">
+                <div className="d-flex flex-column gap-2 mb-3">
                   {[
-                    { value: 'tarjeta',       label: 'Tarjeta de credito / debito' },
-                    { value: 'transferencia', label: 'Transferencia bancaria' },
-                    { value: 'efectivo',      label: 'Pago en efectivo (Rapipago / Pago Facil)' },
+                    { value: 'mercadopago',  label: 'Mercado Pago', sub: 'Tarjeta, debito, efectivo y mas', badge: 'Recomendado' },
+                    { value: 'transferencia', label: 'Transferencia bancaria', sub: 'CBU / Alias', badge: null },
+                    { value: 'efectivo',      label: 'Pago en efectivo', sub: 'Rapipago / Pago Facil', badge: null },
                   ].map(opt => (
                     <label key={opt.value} style={{
                       display: 'flex', alignItems: 'center', gap: 10,
@@ -206,48 +227,27 @@ function Checkout() {
                       background: form.metodoPago === opt.value ? 'rgba(0,137,123,0.04)' : 'white'
                     }}>
                       <input type="radio" name="metodoPago" value={opt.value} checked={form.metodoPago === opt.value} onChange={handleChange} />
-                      <span style={{ fontSize: '0.9rem' }}>{opt.label}</span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
+                          {opt.label}
+                          {opt.badge && <span style={{ fontSize: '0.7rem', background: 'var(--ts-teal)', color: 'white', padding: '1px 7px', borderRadius: 10, fontWeight: 700 }}>{opt.badge}</span>}
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--ts-text-muted)' }}>{opt.sub}</div>
+                      </div>
                     </label>
                   ))}
                 </div>
 
-                {form.metodoPago === 'tarjeta' && (
-                  <Row className="g-3">
-                    <Col sm={12}>
-                      <Form.Label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Numero de tarjeta *</Form.Label>
-                      <Form.Control
-                        name="numeroTarjeta" value={form.numeroTarjeta} size="sm"
-                        placeholder="0000 0000 0000 0000" maxLength={19}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '').slice(0, 16);
-                          const formatted = val.replace(/(.{4})/g, '$1 ').trim();
-                          setForm(p => ({ ...p, numeroTarjeta: formatted }));
-                          if (errors.numeroTarjeta) setErrors(p => ({ ...p, numeroTarjeta: '' }));
-                        }}
-                        isInvalid={!!errors.numeroTarjeta}
-                      />
-                      <Form.Control.Feedback type="invalid">{errors.numeroTarjeta}</Form.Control.Feedback>
-                    </Col>
-                    <Col sm={6}>
-                      <Form.Label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Vencimiento *</Form.Label>
-                      <Form.Control name="vencimiento" value={form.vencimiento} onChange={handleChange} isInvalid={!!errors.vencimiento} size="sm" placeholder="MM/AA" maxLength={5} />
-                      <Form.Control.Feedback type="invalid">{errors.vencimiento}</Form.Control.Feedback>
-                    </Col>
-                    <Col sm={6}>
-                      <Form.Label style={{ fontSize: '0.85rem', fontWeight: 600 }}>CVV *</Form.Label>
-                      <Form.Control name="cvv" value={form.cvv} onChange={handleChange} isInvalid={!!errors.cvv} size="sm" placeholder="123" maxLength={4} type="password" />
-                      <Form.Control.Feedback type="invalid">{errors.cvv}</Form.Control.Feedback>
-                    </Col>
-                    <Col sm={12}>
-                      <small style={{ color: 'var(--ts-text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <FaLock size={10} /> Tus datos estan protegidos con encriptacion SSL
-                      </small>
-                    </Col>
-                  </Row>
+                {form.metodoPago === 'mercadopago' && (
+                  <div style={{ background: '#f0faf9', border: '1px solid var(--ts-teal)', borderRadius: 8, padding: '0.85rem 1rem', fontSize: '0.83rem', color: 'var(--ts-text-muted)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <FaLock size={12} style={{ color: 'var(--ts-teal)', flexShrink: 0 }} />
+                    Al confirmar, seras redirigido a Mercado Pago para completar el pago de forma segura.
+                  </div>
                 )}
 
                 {form.metodoPago === 'transferencia' && (
                   <div style={{ background: 'var(--ts-bg)', borderRadius: 8, padding: '1rem', fontSize: '0.85rem', color: 'var(--ts-text-muted)', lineHeight: 1.8 }}>
+                    <FaUniversity size={13} style={{ marginRight: 6 }} />
                     <strong style={{ color: 'var(--ts-text)' }}>Datos bancarios:</strong><br />
                     CBU: 0000 0000 0000 0000 0000 00<br />
                     Alias: TECHSTORE.TIENDA<br />
@@ -256,7 +256,8 @@ function Checkout() {
                 )}
 
                 {form.metodoPago === 'efectivo' && (
-                  <div style={{ background: 'var(--ts-bg)', borderRadius: 8, padding: '1rem', fontSize: '0.85rem', color: 'var(--ts-text-muted)' }}>
+                  <div style={{ background: 'var(--ts-bg)', borderRadius: 8, padding: '1rem', fontSize: '0.85rem', color: 'var(--ts-text-muted)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <FaMoneyBillWave size={13} />
                     Te enviaremos el codigo de pago por email una vez confirmado el pedido.
                   </div>
                 )}
@@ -314,7 +315,9 @@ function Checkout() {
                 onClick={handleNext}
                 style={{ background: 'var(--ts-teal)', border: 'none', color: 'white', padding: '0.7rem 2rem', borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem', marginLeft: 'auto' }}
               >
-                {step === 3 ? 'Volver a la tienda' : step === 2 ? (sending ? 'Enviando...' : 'Confirmar pedido') : 'Continuar'}
+                {step === 3 ? 'Volver a la tienda' : step === 2
+                  ? (sending ? 'Procesando...' : form.metodoPago === 'mercadopago' ? 'Pagar con Mercado Pago' : 'Confirmar pedido')
+                  : 'Continuar'}
               </button>
             </div>
           </Col>

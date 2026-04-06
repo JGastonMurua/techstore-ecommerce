@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import { FaLaptop, FaShoppingBag, FaCog, FaTruck, FaLock, FaHeadset } from 'react-icons/fa';
@@ -7,10 +7,27 @@ import { useProducts } from '../context/ProductContext';
 import { useAuth } from '../context/AuthContext';
 import ProductCard from '../components/ProductCard';
 import Loading from '../components/Loading';
+import { toast } from 'react-toastify';
 
 function Home() {
   const { products, loading } = useProducts();
   const { isAuthenticated, isAdmin, userName } = useAuth();
+
+  // Detectar retorno de MercadoPago
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('status');
+    if (status === 'approved') {
+      toast.success('¡Pago aprobado! Tu pedido está en camino.');
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (status === 'pending') {
+      toast.info('Tu pago está pendiente de acreditación.');
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (status === 'failure') {
+      toast.error('El pago no se pudo procesar. Podés intentarlo de nuevo.');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
   const featuredProducts = products.slice(0, 4);
 
