@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Button } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import { FaUser, FaShoppingCart, FaHeart, FaHistory, FaSignOutAlt, FaTrash } from 'react-icons/fa';
 import { Helmet } from 'react-helmet';
@@ -81,11 +81,9 @@ function UserDashboard() {
                     </div>
                     <p style={{ margin: '0 0 1rem', fontSize: '0.9rem', fontWeight: 500 }}>Tu carrito está vacío</p>
                     <LinkContainer to="/productos">
-                      <button style={{ background: 'transparent', border: '1.5px solid var(--ts-teal)', color: 'var(--ts-teal)', padding: '0.45rem 1.25rem', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: '0.82rem', transition: 'background 0.2s, color 0.2s' }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'var(--ts-teal)'; e.currentTarget.style.color = 'white'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--ts-teal)'; }}>
+                      <Button variant="outline-success" size="sm" className="rounded-pill px-4 fw-semibold">
                         Ver productos
-                      </button>
+                      </Button>
                     </LinkContainer>
                   </div>
                 ) : (
@@ -107,20 +105,16 @@ function UserDashboard() {
                         +{cartItems.length - 4} producto{cartItems.length - 4 !== 1 ? 's' : ''} más en el carrito
                       </p>
                     )}
-                    <div style={{ display: 'flex', gap: '0.6rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+                    <div className="d-flex gap-2 mt-3 flex-wrap">
                       <LinkContainer to="/checkout">
-                        <button style={{ flex: 1, minWidth: 140, background: 'var(--ts-purple)', border: 'none', color: 'white', padding: '0.55rem 1rem', borderRadius: 6, fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem', transition: 'opacity 0.2s, transform 0.15s', boxShadow: '0 2px 8px rgba(92,45,145,0.25)' }}
-                          onMouseEnter={e => { e.currentTarget.style.opacity = '0.9'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                          onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+                        <Button variant="primary" className="rounded-pill px-4 fw-bold flex-grow-1" style={{ minWidth: 140 }}>
                           Finalizar compra
-                        </button>
+                        </Button>
                       </LinkContainer>
                       <LinkContainer to="/carrito">
-                        <button style={{ background: 'transparent', border: '1.5px solid var(--ts-teal)', color: 'var(--ts-teal)', padding: '0.5rem 1rem', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem', transition: 'background 0.2s, color 0.2s' }}
-                          onMouseEnter={e => { e.currentTarget.style.background = 'var(--ts-teal)'; e.currentTarget.style.color = 'white'; }}
-                          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--ts-teal)'; }}>
+                        <Button variant="outline-success" size="sm" className="rounded-pill px-3 fw-semibold">
                           Ver carrito
-                        </button>
+                        </Button>
                       </LinkContainer>
                     </div>
                   </>
@@ -139,11 +133,9 @@ function UserDashboard() {
                 </div>
                 <p style={{ color: 'var(--ts-text-muted)', fontSize: '0.9rem', margin: '0 0 1rem', fontWeight: 500 }}>Aún no realizaste ninguna compra</p>
                 <LinkContainer to="/productos">
-                  <button style={{ background: 'transparent', border: '1.5px solid var(--ts-teal)', color: 'var(--ts-teal)', padding: '0.45rem 1.5rem', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem', transition: 'background 0.2s, color 0.2s' }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--ts-teal)'; e.currentTarget.style.color = 'white'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--ts-teal)'; }}>
+                  <Button variant="outline-success" size="sm" className="rounded-pill px-4 fw-semibold">
                     Ver productos
-                  </button>
+                  </Button>
                 </LinkContainer>
               </div>
             </div>
@@ -170,14 +162,14 @@ function UserDashboard() {
                   <span style={{ color: 'var(--ts-text-muted)' }}>Cuenta: </span>
                   <span style={{ background: 'var(--ts-purple)', color: 'white', fontSize: '0.72rem', padding: '0.15rem 0.5rem', borderRadius: 20, fontWeight: 600 }}>Usuario</span>
                 </div>
-                <button
+                <Button
+                  variant="outline-danger"
                   onClick={handleLogout}
-                  style={{ width: '100%', background: 'none', border: '1px solid var(--ts-border)', color: 'var(--ts-danger)', padding: '0.5rem', borderRadius: 6, cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'background 0.2s, color 0.2s' }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--ts-danger)'; e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = 'var(--ts-danger)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--ts-danger)'; e.currentTarget.style.borderColor = 'var(--ts-border)'; }}
+                  className="rounded-pill w-100 d-flex align-items-center justify-content-center gap-2"
+                  size="sm"
                 >
                   <FaSignOutAlt size={13} /> Cerrar sesión
-                </button>
+                </Button>
               </div>
             </div>
 
