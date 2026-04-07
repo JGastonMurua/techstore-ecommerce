@@ -389,9 +389,10 @@ function Admin() {
             )}
           </Card.Body>
         </Card>
-      </Container>
 
         </> /* fin tab productos */}
+
+      </Container>
 
       {/* Modal para agregar/editar producto */}
       <ProductForm
