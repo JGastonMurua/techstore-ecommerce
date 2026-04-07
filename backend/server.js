@@ -59,14 +59,17 @@ app.post('/api/send-email', async (req, res) => {
 
   const itemsHtml = buildItemsTableHtml(items);
 
-  console.log(`📤 Enviando email a: ${to_email}`);
+  // Sin dominio propio, Resend solo entrega al email del dueño de la cuenta.
+  // RESEND_TO_EMAIL en Render overridea el destino para que siempre llegue al admin.
+  const actualTo = process.env.RESEND_TO_EMAIL || to_email;
+  console.log(`📤 Enviando email a: ${actualTo} (cliente: ${to_email})`);
   try {
     const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('Resend timeout after 20s')), 20000)
     );
     const sendPromise = resend.emails.send({
       from:    'onboarding@resend.dev',
-      to:      to_email,
+      to:      actualTo,
       subject: `Pedido confirmado ${order_id} — TechStore`,
       html: `
         <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #e0e0e0;border-radius:10px;overflow:hidden">
@@ -333,6 +336,7 @@ app.post('/api/webhook', async (req, res) => {
 
           // Enviar email de confirmación solo cuando el pago es aprobado
           if (payment.status === 'approved' && orderData?.customer_email) {
+            const emailDest = process.env.RESEND_TO_EMAIL || orderData.customer_email;
             const totalFmt = new Intl.NumberFormat('es-AR', {
               style: 'currency', currency: 'ARS', maximumFractionDigits: 0
             }).format((orderData.total || 0) + (orderData.shipping || 0));
@@ -344,7 +348,7 @@ app.post('/api/webhook', async (req, res) => {
             try {
               await resend.emails.send({
                 from:    'onboarding@resend.dev',
-                to:      orderData.customer_email,
+                to:      emailDest,
                 subject: `Pago aprobado ${payment.external_reference} — TechStore`,
                 html: `
                   <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #e0e0e0;border-radius:10px;overflow:hidden">
