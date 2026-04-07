@@ -175,6 +175,23 @@ app.post('/api/orders/manual', async (req, res) => {
     }]);
     if (error) throw error;
     console.log('💾 Orden manual guardada:', orderId);
+
+    // Decrementar stock de cada producto
+    for (const item of items) {
+      const { data: prod } = await supabase
+        .from('productos')
+        .select('stock')
+        .eq('id', item.id)
+        .single();
+      if (prod) {
+        await supabase
+          .from('productos')
+          .update({ stock: Math.max(0, (prod.stock || 0) - item.quantity) })
+          .eq('id', item.id);
+      }
+    }
+    console.log('📦 Stock actualizado para orden manual:', orderId);
+
     res.json({ success: true });
   } catch (error) {
     console.error('❌ Error guardando orden manual:', error.message);
@@ -259,6 +276,25 @@ app.post('/api/webhook', async (req, res) => {
           console.error('⚠️ Error actualizando orden en BD:', dbError.message);
         } else {
           console.log(`✅ Orden ${payment.external_reference} actualizada a: ${payment.status}`);
+
+          // Decrementar stock cuando el pago es aprobado
+          if (payment.status === 'approved' && orderData?.items) {
+            const orderItems = Array.isArray(orderData.items) ? orderData.items : [];
+            for (const item of orderItems) {
+              const { data: prod } = await supabase
+                .from('productos')
+                .select('stock')
+                .eq('id', item.id)
+                .single();
+              if (prod) {
+                await supabase
+                  .from('productos')
+                  .update({ stock: Math.max(0, (prod.stock || 0) - item.quantity) })
+                  .eq('id', item.id);
+              }
+            }
+            console.log(`📦 Stock actualizado para orden MP: ${payment.external_reference}`);
+          }
 
           // Enviar email de confirmación solo cuando el pago es aprobado
           if (payment.status === 'approved' && orderData?.customer_email) {

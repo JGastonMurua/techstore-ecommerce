@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Table, Badge, Alert, Image, Nav } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Table, Badge, Alert, Image, Nav, Pagination } from 'react-bootstrap';
 import { FaPlus, FaEdit, FaTrash, FaCog, FaShoppingBag, FaBoxOpen } from 'react-icons/fa';
 import { Helmet } from 'react-helmet';
 import { useProducts } from '../context/ProductContext';
@@ -7,6 +7,8 @@ import ProductForm from '../components/ProductForm';
 import ConfirmModal from '../components/ConfirmModal';
 import Loading from '../components/Loading';
 import { CONFIG } from '../config/cliente';
+
+const ITEMS_PER_PAGE = 10;
 
 const STATUS_LABELS = {
   pending:        { label: 'Pendiente',        bg: 'warning'   },
@@ -30,6 +32,8 @@ function Admin() {
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [ordersError, setOrdersError] = useState(null);
+  const [productPage, setProductPage] = useState(1);
+  const [orderPage, setOrderPage] = useState(1);
 
   // Estados para los modales
   const [showProductForm, setShowProductForm] = useState(false);
@@ -39,7 +43,10 @@ function Admin() {
   const [formLoading, setFormLoading] = useState(false);
 
   useEffect(() => {
-    if (activeTab === 'orders') fetchOrders();
+    if (activeTab === 'orders') {
+      setOrderPage(1);
+      fetchOrders();
+    }
   }, [activeTab]);
 
   const fetchOrders = async () => {
@@ -50,6 +57,7 @@ function Admin() {
       if (!res.ok) throw new Error('Error al cargar órdenes');
       const data = await res.json();
       setOrders(data);
+      setOrderPage(1);
     } catch (e) {
       setOrdersError(e.message);
     } finally {
@@ -119,6 +127,32 @@ function Admin() {
     }
   };
 
+  // Generar items de paginación
+  const buildPaginationItems = (currentPage, totalPages, setPage) => {
+    const items = [];
+    const maxVisible = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+    if (endPage - startPage + 1 < maxVisible) {
+      startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+
+    items.push(
+      <Pagination.First key="first" onClick={() => setPage(1)} disabled={currentPage === 1} />,
+      <Pagination.Prev key="prev" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} />
+    );
+    for (let i = startPage; i <= endPage; i++) {
+      items.push(
+        <Pagination.Item key={i} active={i === currentPage} onClick={() => setPage(i)}>{i}</Pagination.Item>
+      );
+    }
+    items.push(
+      <Pagination.Next key="next" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} />,
+      <Pagination.Last key="last" onClick={() => setPage(totalPages)} disabled={currentPage === totalPages} />
+    );
+    return items;
+  };
+
   // Obtener badge de stock
   const getStockBadge = (stock) => {
     if (stock === 0) return <Badge bg="danger">Sin stock</Badge>;
@@ -184,49 +218,67 @@ function Admin() {
                   <FaShoppingBag size={40} style={{ opacity: 0.2, marginBottom: 12 }} />
                   <p>Todavía no hay órdenes</p>
                 </div>
-              ) : (
-                <div className="table-responsive">
-                  <Table hover className="mb-0" style={{ fontSize: '0.85rem' }}>
-                    <thead className="table-light">
-                      <tr>
-                        <th>Orden</th>
-                        <th>Cliente</th>
-                        <th>Método</th>
-                        <th>Total</th>
-                        <th>Estado</th>
-                        <th>Fecha</th>
-                        <th>Items</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {orders.map(order => {
-                        const st = STATUS_LABELS[order.status] || { label: order.status, bg: 'secondary' };
-                        const items = Array.isArray(order.items) ? order.items : [];
-                        return (
-                          <tr key={order.id}>
-                            <td><strong>{order.order_id}</strong></td>
-                            <td>
-                              <div>{order.customer_name}</div>
-                              <small className="text-muted">{order.customer_email}</small>
-                            </td>
-                            <td style={{ textTransform: 'capitalize' }}>{order.payment_method}</td>
-                            <td><strong>{new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(order.total + (order.shipping || 0))}</strong></td>
-                            <td><Badge bg={st.bg}>{st.label}</Badge></td>
-                            <td>{new Date(order.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })}</td>
-                            <td>
-                              {items.map((item, i) => (
-                                <div key={i} style={{ whiteSpace: 'nowrap' }}>
-                                  {item.nombre} <span className="text-muted">x{item.quantity}</span>
-                                </div>
-                              ))}
-                            </td>
+              ) : (() => {
+                const totalOrderPages = Math.ceil(orders.length / ITEMS_PER_PAGE);
+                const paginatedOrders = orders.slice((orderPage - 1) * ITEMS_PER_PAGE, orderPage * ITEMS_PER_PAGE);
+                const orderStart = (orderPage - 1) * ITEMS_PER_PAGE + 1;
+                const orderEnd = Math.min(orderPage * ITEMS_PER_PAGE, orders.length);
+                return (
+                  <>
+                    <div className="table-responsive">
+                      <Table hover className="mb-0" style={{ fontSize: '0.85rem' }}>
+                        <thead className="table-light">
+                          <tr>
+                            <th>Orden</th>
+                            <th>Cliente</th>
+                            <th>Método</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                            <th>Items</th>
                           </tr>
-                        );
-                      })}
-                    </tbody>
-                  </Table>
-                </div>
-              )}
+                        </thead>
+                        <tbody>
+                          {paginatedOrders.map(order => {
+                            const st = STATUS_LABELS[order.status] || { label: order.status, bg: 'secondary' };
+                            const items = Array.isArray(order.items) ? order.items : [];
+                            return (
+                              <tr key={order.id}>
+                                <td><strong>{order.order_id}</strong></td>
+                                <td>
+                                  <div>{order.customer_name}</div>
+                                  <small className="text-muted">{order.customer_email}</small>
+                                </td>
+                                <td style={{ textTransform: 'capitalize' }}>{order.payment_method}</td>
+                                <td><strong>{new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(order.total + (order.shipping || 0))}</strong></td>
+                                <td><Badge bg={st.bg}>{st.label}</Badge></td>
+                                <td>{new Date(order.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })}</td>
+                                <td>
+                                  {items.map((item, i) => (
+                                    <div key={i} style={{ whiteSpace: 'nowrap' }}>
+                                      {item.nombre} <span className="text-muted">x{item.quantity}</span>
+                                    </div>
+                                  ))}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </Table>
+                    </div>
+                    {orders.length > ITEMS_PER_PAGE && (
+                      <div className="px-3 py-2">
+                        <div className="text-muted small mb-2">
+                          Mostrando {orderStart}-{orderEnd} de {orders.length} órdenes
+                        </div>
+                        <Pagination size="sm" className="justify-content-center mb-0">
+                          {buildPaginationItems(orderPage, totalOrderPages, setOrderPage)}
+                        </Pagination>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </Card.Body>
           </Card>
         )}
@@ -308,85 +360,103 @@ function Admin() {
                   Agregar Primer Producto
                 </Button>
               </div>
-            ) : (
-              <div className="table-responsive">
-                <Table hover className="mb-0">
-                  <thead className="table-light">
-                    <tr>
-                      <th>Producto</th>
-                      <th>Categoría</th>
-                      <th>Precio</th>
-                      <th>Stock</th>
-                      <th>Estado</th>
-                      <th className="text-center">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {products.map(product => (
-                      <tr key={product.id}>
-                        <td>
-                          <div className="d-flex align-items-center">
-                            <Image
-                              src={product.imagen || 'https://via.placeholder.com/50x50?text=Sin+Imagen'}
-                              alt={product.nombre}
-                              rounded
-                              style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-                              className="me-3"
-                            />
-                            <div>
-                              <div className="fw-bold">{product.nombre}</div>
-                              <small className="text-muted">
-                                {product.marca && `${product.marca} • `}
-                                ID: {product.id}
-                              </small>
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          <Badge bg="secondary">
-                            {product.categoria || 'Sin categoría'}
-                          </Badge>
-                        </td>
-                        <td className="fw-bold text-primary">
-                          {formatPrice(product.precio)}
-                        </td>
-                        <td>
-                          <div>
-                            <span className="fw-bold">{product.stock || 0}</span>
-                            <div>{getStockBadge(product.stock || 0)}</div>
-                          </div>
-                        </td>
-                        <td>
-                          <Badge bg={product.disponible !== false ? "success" : "secondary"}>
-                            {product.disponible !== false ? "Disponible" : "No disponible"}
-                          </Badge>
-                        </td>
-                        <td>
-                          <div className="d-flex gap-2 justify-content-center">
-                            <Button
-                              variant="outline-primary"
-                              size="sm"
-                              onClick={() => handleEditProduct(product)}
-                              title="Editar producto"
-                            >
-                              <FaEdit />
-                            </Button>
-                            <Button
-                              variant="outline-danger"
-                              size="sm"
-                              onClick={() => handleDeleteProduct(product)}
-                              title="Eliminar producto"
-                            >
-                              <FaTrash />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </div>
-            )}
+            ) : (() => {
+              const totalProductPages = Math.ceil(products.length / ITEMS_PER_PAGE);
+              const paginatedProducts = products.slice((productPage - 1) * ITEMS_PER_PAGE, productPage * ITEMS_PER_PAGE);
+              const productStart = (productPage - 1) * ITEMS_PER_PAGE + 1;
+              const productEnd = Math.min(productPage * ITEMS_PER_PAGE, products.length);
+              return (
+                <>
+                  <div className="table-responsive">
+                    <Table hover className="mb-0">
+                      <thead className="table-light">
+                        <tr>
+                          <th>Producto</th>
+                          <th>Categoría</th>
+                          <th>Precio</th>
+                          <th>Stock</th>
+                          <th>Estado</th>
+                          <th className="text-center">Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {paginatedProducts.map(product => (
+                          <tr key={product.id}>
+                            <td>
+                              <div className="d-flex align-items-center">
+                                <Image
+                                  src={product.imagen || 'https://via.placeholder.com/50x50?text=Sin+Imagen'}
+                                  alt={product.nombre}
+                                  rounded
+                                  style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                  className="me-3"
+                                />
+                                <div>
+                                  <div className="fw-bold">{product.nombre}</div>
+                                  <small className="text-muted">
+                                    {product.marca && `${product.marca} • `}
+                                    ID: {product.id}
+                                  </small>
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <Badge bg="secondary">
+                                {product.categoria || 'Sin categoría'}
+                              </Badge>
+                            </td>
+                            <td className="fw-bold text-primary">
+                              {formatPrice(product.precio)}
+                            </td>
+                            <td>
+                              <div>
+                                <span className="fw-bold">{product.stock || 0}</span>
+                                <div>{getStockBadge(product.stock || 0)}</div>
+                              </div>
+                            </td>
+                            <td>
+                              <Badge bg={product.disponible !== false ? "success" : "secondary"}>
+                                {product.disponible !== false ? "Disponible" : "No disponible"}
+                              </Badge>
+                            </td>
+                            <td>
+                              <div className="d-flex gap-2 justify-content-center">
+                                <Button
+                                  variant="outline-primary"
+                                  size="sm"
+                                  onClick={() => handleEditProduct(product)}
+                                  title="Editar producto"
+                                >
+                                  <FaEdit />
+                                </Button>
+                                <Button
+                                  variant="outline-danger"
+                                  size="sm"
+                                  onClick={() => handleDeleteProduct(product)}
+                                  title="Eliminar producto"
+                                >
+                                  <FaTrash />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </div>
+                  {products.length > ITEMS_PER_PAGE && (
+                    <div className="px-3 py-2">
+                      <div className="text-muted small mb-2">
+                        Mostrando {productStart}-{productEnd} de {products.length} productos
+                      </div>
+                      <Pagination size="sm" className="justify-content-center mb-0">
+                        {buildPaginationItems(productPage, totalProductPages, setProductPage)}
+                      </Pagination>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </Card.Body>
         </Card>
 
