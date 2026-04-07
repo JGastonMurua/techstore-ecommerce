@@ -58,8 +58,10 @@ export function AuthProvider({ children }) {
       // Simular delay de red
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      // Buscar usuario en la lista de demo
-      const foundUser = DEMO_USERS.find(
+      // Buscar en usuarios demo primero, luego en registrados
+      const registeredUsers = JSON.parse(localStorage.getItem('techstore_registered_users') || '[]');
+      const allUsers = [...DEMO_USERS, ...registeredUsers];
+      const foundUser = allUsers.find(
         user => user.email.toLowerCase() === email.toLowerCase() && user.password === password
       );
 
@@ -103,8 +105,10 @@ export function AuthProvider({ children }) {
       // Simular delay de red
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Verificar si el email ya existe
-      const emailExists = DEMO_USERS.some(
+      // Verificar si el email ya existe (demo + registrados)
+      const registeredUsers = JSON.parse(localStorage.getItem('techstore_registered_users') || '[]');
+      const allUsers = [...DEMO_USERS, ...registeredUsers];
+      const emailExists = allUsers.some(
         user => user.email.toLowerCase() === userData.email.toLowerCase()
       );
 
@@ -112,27 +116,28 @@ export function AuthProvider({ children }) {
         throw new Error('Este email ya está registrado');
       }
 
-      // En una app real, aquí enviarías los datos al servidor
-      // Por ahora, solo simularemos el registro exitoso
-
       const newUser = {
-        id: Date.now(), // ID temporal
+        id: Date.now(),
         email: userData.email,
+        password: userData.password, // guardado para poder re-loguearse
         role: 'user',
         name: userData.name,
         lastName: userData.lastName,
-        loginTime: new Date().toISOString()
       };
 
-      // Guardar en localStorage
-      localStorage.setItem('techstore_user', JSON.stringify(newUser));
+      // Persistir usuario registrado para futuros logins
+      localStorage.setItem('techstore_registered_users', JSON.stringify([...registeredUsers, newUser]));
+
+      // Guardar sesión activa (sin password)
+      const sessionUser = { id: newUser.id, email: newUser.email, role: newUser.role, name: newUser.name, lastName: newUser.lastName, loginTime: new Date().toISOString() };
+      localStorage.setItem('techstore_user', JSON.stringify(sessionUser));
       
       // Actualizar estado
-      setUser(newUser);
-      
+      setUser(sessionUser);
+
       toast.success(`¡Registro exitoso! Bienvenido ${newUser.name}!`);
       
-      return { success: true, user: newUser };
+      return { success: true, user: sessionUser };
 
     } catch (error) {
       toast.error(error.message || 'Error al registrar usuario');

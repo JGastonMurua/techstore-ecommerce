@@ -73,8 +73,6 @@ function Admin() {
 
   // Manejar editar producto
   const handleEditProduct = (product) => {
-    console.log('Editando producto:', product); // Debug
-    console.log('ID del producto:', product.id); // Debug
     setSelectedProduct(product);
     setShowProductForm(true);
   };

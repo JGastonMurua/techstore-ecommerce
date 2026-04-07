@@ -244,16 +244,63 @@ app.post('/api/webhook', async (req, res) => {
 
       // Actualizar estado de la orden en Supabase
       if (payment.external_reference) {
-        const { error: dbError } = await supabase
+        const { data: orderData, error: dbError } = await supabase
           .from('orders')
           .update({
-            status:         payment.status,
-            mp_payment_id:  String(data.id),
-            updated_at:     new Date().toISOString(),
+            status:        payment.status,
+            mp_payment_id: String(data.id),
+            updated_at:    new Date().toISOString(),
           })
-          .eq('order_id', payment.external_reference);
-        if (dbError) console.error('⚠️ Error actualizando orden en BD:', dbError.message);
-        else console.log(`✅ Orden ${payment.external_reference} actualizada a: ${payment.status}`);
+          .eq('order_id', payment.external_reference)
+          .select()
+          .single();
+
+        if (dbError) {
+          console.error('⚠️ Error actualizando orden en BD:', dbError.message);
+        } else {
+          console.log(`✅ Orden ${payment.external_reference} actualizada a: ${payment.status}`);
+
+          // Enviar email de confirmación solo cuando el pago es aprobado
+          if (payment.status === 'approved' && orderData?.customer_email) {
+            const totalFmt = new Intl.NumberFormat('es-AR', {
+              style: 'currency', currency: 'ARS', maximumFractionDigits: 0
+            }).format((orderData.total || 0) + (orderData.shipping || 0));
+            try {
+              await resend.emails.send({
+                from:    'onboarding@resend.dev',
+                to:      orderData.customer_email,
+                subject: `Pago aprobado ${payment.external_reference} — TechStore`,
+                html: `
+                  <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #e0e0e0;border-radius:10px;overflow:hidden">
+                    <div style="background:#5C2D91;padding:24px;text-align:center">
+                      <h1 style="color:white;margin:0;font-size:1.6rem">TechStore</h1>
+                      <p style="color:rgba(255,255,255,0.8);margin:4px 0 0;font-size:0.9rem">Tu tienda de tecnología online</p>
+                    </div>
+                    <div style="padding:28px;background:#f9f9f9">
+                      <h2 style="color:#111;margin-top:0">¡Tu pago fue aprobado! 🎉</h2>
+                      <p style="color:#444">Hola <strong>${orderData.customer_name}</strong>, tu pago fue procesado correctamente y tu pedido está en camino.</p>
+                      <div style="background:white;border-radius:8px;padding:20px;margin:20px 0;border:1px solid #e0e0e0">
+                        <table style="width:100%;border-collapse:collapse;font-size:0.9rem">
+                          <tr><td style="padding:6px 0;color:#767676">Número de orden</td><td style="padding:6px 0;text-align:right;font-weight:700">${payment.external_reference}</td></tr>
+                          <tr><td style="padding:6px 0;color:#767676">Total pagado</td><td style="padding:6px 0;text-align:right;font-weight:700">${totalFmt}</td></tr>
+                          <tr><td style="padding:6px 0;color:#767676">Dirección de entrega</td><td style="padding:6px 0;text-align:right">${orderData.address}, ${orderData.city}</td></tr>
+                          <tr><td style="padding:6px 0;color:#767676">Entrega estimada</td><td style="padding:6px 0;text-align:right">3-5 días hábiles</td></tr>
+                        </table>
+                      </div>
+                      <p style="color:#666;font-size:0.88rem">Ante cualquier consulta respondé este email o escribinos por WhatsApp.</p>
+                    </div>
+                    <div style="background:#1A0A2E;padding:14px;text-align:center">
+                      <p style="color:rgba(255,255,255,0.5);font-size:0.78rem;margin:0">TechStore © ${new Date().getFullYear()} — Email automático.</p>
+                    </div>
+                  </div>
+                `
+              });
+              console.log(`📧 Email confirmación MP enviado a: ${orderData.customer_email}`);
+            } catch (emailErr) {
+              console.error('⚠️ Error enviando email MP:', emailErr.message);
+            }
+          }
+        }
       }
 
     } catch (error) {
