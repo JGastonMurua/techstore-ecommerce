@@ -350,6 +350,32 @@ app.post('/api/webhook', async (req, res) => {
   res.sendStatus(200);
 });
 
+// ── Endpoint: actualizar fulfillment status (admin) ─────────
+app.patch('/api/orders/:orderId/fulfillment', async (req, res) => {
+  const { orderId } = req.params;
+  const { fulfillment_status } = req.body;
+
+  const VALID = ['new', 'preparing', 'shipped', 'in_transit', 'delivered', 'picked_up', 'cancelled'];
+  if (!VALID.includes(fulfillment_status)) {
+    return res.status(400).json({ error: `Estado inválido. Permitidos: ${VALID.join(', ')}` });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('orders')
+      .update({ fulfillment_status, updated_at: new Date().toISOString() })
+      .eq('order_id', orderId)
+      .select()
+      .single();
+    if (error) throw error;
+    console.log(`📦 Fulfillment ${orderId} → ${fulfillment_status}`);
+    res.json(data);
+  } catch (error) {
+    console.error('❌ Error actualizando fulfillment:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ── Health check ─────────────────────────────────────────────
 app.get('/health', (req, res) => res.json({ status: 'ok', service: 'TechStore Backend' }));
 

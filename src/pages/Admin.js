@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Table, Badge, Alert, Image, Nav, Pagination } from 'react-bootstrap';
-import { FaPlus, FaEdit, FaTrash, FaCog, FaShoppingBag, FaBoxOpen } from 'react-icons/fa';
+import { Container, Row, Col, Card, Button, Table, Badge, Alert, Image, Nav, Pagination, Form } from 'react-bootstrap';
+import { FaPlus, FaEdit, FaTrash, FaCog, FaShoppingBag, FaBoxOpen, FaTruck } from 'react-icons/fa';
 import { Helmet } from 'react-helmet';
 import { useProducts } from '../context/ProductContext';
 import ProductForm from '../components/ProductForm';
@@ -16,6 +16,16 @@ const STATUS_LABELS = {
   rejected:       { label: 'Rechazado',         bg: 'danger'    },
   pending_manual: { label: 'Pago manual',       bg: 'info'      },
   cancelled:      { label: 'Cancelado',         bg: 'secondary' },
+};
+
+const FULFILLMENT_LABELS = {
+  new:        { label: 'Nuevo',              bg: 'secondary', color: '#6c757d' },
+  preparing:  { label: 'Preparando',         bg: 'info',      color: '#0dcaf0' },
+  shipped:    { label: 'Enviado',            bg: 'primary',   color: '#0d6efd' },
+  in_transit: { label: 'En camino',          bg: 'warning',   color: '#ffc107' },
+  delivered:  { label: 'Entregado',          bg: 'success',   color: '#198754' },
+  picked_up:  { label: 'Retirado por local', bg: 'success',   color: '#198754' },
+  cancelled:  { label: 'Cancelado',          bg: 'danger',    color: '#dc3545' },
 };
 
 function Admin() {
@@ -62,6 +72,25 @@ function Admin() {
       setOrdersError(e.message);
     } finally {
       setOrdersLoading(false);
+    }
+  };
+
+  // Actualizar fulfillment status
+  const handleFulfillmentChange = async (orderId, newStatus) => {
+    try {
+      const res = await fetch(`${CONFIG.backendUrl}/api/orders/${orderId}/fulfillment`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fulfillment_status: newStatus }),
+      });
+      if (!res.ok) throw new Error('Error al actualizar');
+      // Actualizar en local sin recargar
+      setOrders(prev => prev.map(o =>
+        o.order_id === orderId ? { ...o, fulfillment_status: newStatus } : o
+      ));
+    } catch (e) {
+      console.error('Error fulfillment:', e);
+      alert('Error al actualizar estado de envío');
     }
   };
 
@@ -233,7 +262,8 @@ function Admin() {
                             <th>Cliente</th>
                             <th>Método</th>
                             <th>Total</th>
-                            <th>Estado</th>
+                            <th>Pago</th>
+                            <th><FaTruck size={12} className="me-1" />Envío</th>
                             <th>Fecha</th>
                             <th>Items</th>
                           </tr>
@@ -252,6 +282,25 @@ function Admin() {
                                 <td style={{ textTransform: 'capitalize' }}>{order.payment_method}</td>
                                 <td><strong>{new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(order.total + (order.shipping || 0))}</strong></td>
                                 <td><Badge bg={st.bg}>{st.label}</Badge></td>
+                                <td>
+                                  <Form.Select
+                                    size="sm"
+                                    value={order.fulfillment_status || 'new'}
+                                    onChange={(e) => handleFulfillmentChange(order.order_id, e.target.value)}
+                                    style={{
+                                      fontSize: '0.78rem',
+                                      fontWeight: 600,
+                                      minWidth: 140,
+                                      borderColor: (FULFILLMENT_LABELS[order.fulfillment_status || 'new']?.color || '#ccc'),
+                                      color: (FULFILLMENT_LABELS[order.fulfillment_status || 'new']?.color || '#333'),
+                                      cursor: 'pointer',
+                                    }}
+                                  >
+                                    {Object.entries(FULFILLMENT_LABELS).map(([key, val]) => (
+                                      <option key={key} value={key}>{val.label}</option>
+                                    ))}
+                                  </Form.Select>
+                                </td>
                                 <td>{new Date(order.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })}</td>
                                 <td>
                                   {items.map((item, i) => (
