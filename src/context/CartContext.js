@@ -5,6 +5,10 @@ const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const openCart  = () => setIsCartOpen(true);
+  const closeCart = () => setIsCartOpen(false);
 
   // Cargar carrito desde localStorage al iniciar
   useEffect(() => {
@@ -26,11 +30,13 @@ export function CartProvider({ children }) {
   // Función para agregar producto al carrito
   const addToCart = (product) => {
     setCartItems(prevItems => {
-      // Comparar IDs directamente
       const existingItem = prevItems.find(item => item.id === product.id);
-      
       if (existingItem) {
-        // Si ya existe, incrementar cantidad
+        // Respetar stock máximo
+        if (product.stock !== undefined && existingItem.quantity >= product.stock) {
+          toast.warning(`Solo quedan ${product.stock} unidades disponibles`);
+          return prevItems;
+        }
         toast.info(`Cantidad actualizada de ${product.nombre}`);
         return prevItems.map(item =>
           item.id === product.id
@@ -38,7 +44,6 @@ export function CartProvider({ children }) {
             : item
         );
       } else {
-        // Si no existe, agregarlo
         toast.success(`${product.nombre} agregado al carrito`);
         return [...prevItems, { ...product, quantity: 1 }];
       }
@@ -124,7 +129,12 @@ export function CartProvider({ children }) {
   const value = {
     // Estado
     cartItems,
-    
+    isCartOpen,
+
+    // Drawer
+    openCart,
+    closeCart,
+
     // Funciones principales
     addToCart,
     removeFromCart,
@@ -132,7 +142,7 @@ export function CartProvider({ children }) {
     incrementQuantity,
     decrementQuantity,
     clearCart,
-    
+
     // Funciones de consulta
     getTotalItems,
     getTotalPrice,

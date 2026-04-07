@@ -5,9 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import { FaShoppingCart, FaLaptop, FaCog, FaUser, FaSignInAlt, FaSignOutAlt } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import CartDrawer from './CartDrawer';
 
 function AppNavbar() {
-  const { getTotalItems } = useCart();
+  const { getTotalItems, openCart } = useCart();
   const { isAuthenticated, isAdmin, logout, userName, user } = useAuth();
   const navigate = useNavigate();
   const totalItems = getTotalItems();
@@ -36,22 +37,24 @@ function AppNavbar() {
           <Navbar.Collapse id="navbar-nav">
             <Nav className="ms-lg-auto align-items-lg-center gap-1">
 
-              {/* Carrito */}
-              <LinkContainer to="/carrito">
-                <Nav.Link className="position-relative d-flex align-items-center gap-1">
-                  <FaShoppingCart size={17} />
-                  <span style={{ fontSize: '0.85rem' }}>Carrito</span>
-                  {totalItems > 0 && (
-                    <Badge
-                      pill
-                      className="cart-badge position-absolute"
-                      style={{ top: '2px', right: '0px' }}
-                    >
-                      {totalItems}
-                    </Badge>
-                  )}
-                </Nav.Link>
-              </LinkContainer>
+              {/* Carrito — abre drawer lateral */}
+              <Nav.Link
+                onClick={openCart}
+                className="position-relative d-flex align-items-center gap-1"
+                style={{ cursor: 'pointer' }}
+              >
+                <FaShoppingCart size={17} />
+                <span style={{ fontSize: '0.85rem' }}>Carrito</span>
+                {totalItems > 0 && (
+                  <Badge
+                    pill
+                    className="cart-badge position-absolute"
+                    style={{ top: '2px', right: '0px' }}
+                  >
+                    {totalItems}
+                  </Badge>
+                )}
+              </Nav.Link>
 
               {isAuthenticated() ? (
                 <>
@@ -123,6 +126,7 @@ function AppNavbar() {
         </Container>
       </Navbar>
 
+      <CartDrawer />
     </>
   );
 }
