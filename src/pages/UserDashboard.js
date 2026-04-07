@@ -81,9 +81,9 @@ function UserDashboard() {
                     </div>
                     <p style={{ margin: '0 0 1rem', fontSize: '0.9rem', fontWeight: 500 }}>Tu carrito está vacío</p>
                     <LinkContainer to="/productos">
-                      <button style={{ background: 'var(--ts-teal)', border: 'none', color: 'white', padding: '0.45rem 1.25rem', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: '0.82rem', transition: 'opacity 0.2s' }}
-                        onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
-                        onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+                      <button style={{ background: 'transparent', border: '1.5px solid var(--ts-teal)', color: 'var(--ts-teal)', padding: '0.45rem 1.25rem', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: '0.82rem', transition: 'background 0.2s, color 0.2s' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'var(--ts-teal)'; e.currentTarget.style.color = 'white'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--ts-teal)'; }}>
                         Ver productos
                       </button>
                     </LinkContainer>
@@ -139,9 +139,9 @@ function UserDashboard() {
                 </div>
                 <p style={{ color: 'var(--ts-text-muted)', fontSize: '0.9rem', margin: '0 0 1rem', fontWeight: 500 }}>Aún no realizaste ninguna compra</p>
                 <LinkContainer to="/productos">
-                  <button style={{ background: 'var(--ts-teal)', border: 'none', color: 'white', padding: '0.45rem 1.5rem', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem', transition: 'opacity 0.2s' }}
-                    onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
-                    onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+                  <button style={{ background: 'transparent', border: '1.5px solid var(--ts-teal)', color: 'var(--ts-teal)', padding: '0.45rem 1.5rem', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem', transition: 'background 0.2s, color 0.2s' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--ts-teal)'; e.currentTarget.style.color = 'white'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--ts-teal)'; }}>
                     Ver productos
                   </button>
                 </LinkContainer>
