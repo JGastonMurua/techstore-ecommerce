@@ -122,32 +122,34 @@ app.post('/api/create-preference', async (req, res) => {
     });
     console.log('✅ Preferencia creada:', result.id);
 
-    // Guardar orden en Supabase con estado 'pending'
-    if (orderData) {
-      const { error: dbError } = await supabase.from('orders').insert([{
-        order_id:        orderId,
-        customer_name:   `${orderData.nombre} ${orderData.apellido}`,
-        customer_email:  orderData.email,
-        customer_phone:  orderData.telefono,
-        address:         orderData.direccion,
-        city:            orderData.ciudad,
-        province:        orderData.provincia,
-        payment_method:  'mercadopago',
-        total:           orderData.total,
-        shipping:        orderData.shipping,
-        status:          'pending',
-        mp_preference_id: result.id,
-        items:           items.map(i => ({ id: i.id, nombre: i.nombre, precio: i.precio, quantity: i.quantity })),
-      }]);
-      if (dbError) console.error('⚠️ Error guardando orden en BD:', dbError.message);
-      else console.log('💾 Orden guardada en BD:', orderId);
-    }
-
+    // Responder inmediatamente — no esperar a que se guarde en BD
     res.json({
       id: result.id,
       init_point: result.init_point,
       sandbox_init_point: result.sandbox_init_point,
     });
+
+    // Guardar orden en Supabase en background (fire-and-forget)
+    if (orderData) {
+      supabase.from('orders').insert([{
+        order_id:         orderId,
+        customer_name:    `${orderData.nombre} ${orderData.apellido}`,
+        customer_email:   orderData.email,
+        customer_phone:   orderData.telefono,
+        address:          orderData.direccion,
+        city:             orderData.ciudad,
+        province:         orderData.provincia,
+        payment_method:   'mercadopago',
+        total:            orderData.total,
+        shipping:         orderData.shipping,
+        status:           'pending',
+        mp_preference_id: result.id,
+        items:            items.map(i => ({ id: i.id, nombre: i.nombre, precio: i.precio, quantity: i.quantity })),
+      }]).then(({ error: dbError }) => {
+        if (dbError) console.error('⚠️ Error guardando orden en BD:', dbError.message);
+        else console.log('💾 Orden guardada en BD:', orderId);
+      });
+    }
   } catch (error) {
     console.error('❌ Error creando preferencia MP:', error.message);
     res.status(500).json({ error: error.message });

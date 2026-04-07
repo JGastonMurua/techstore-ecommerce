@@ -1,0 +1,21 @@
+name: Keep Render Backend Alive
+
+on:
+  schedule:
+    # Cada 10 minutos — evita que Render free tier duerma el servidor
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # permite correrlo manualmente desde GitHub
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend health
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://techstore-ecommerce.onrender.com/health)
+          echo "Backend status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "⚠️ Backend no respondió correctamente (status: $STATUS)"
+          else
+            echo "✅ Backend activo"
+          fi
