@@ -22,12 +22,42 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// ── Helper: generar HTML del detalle de items ───────────────
+function buildItemsTableHtml(items) {
+  if (!items || !Array.isArray(items) || items.length === 0) return '';
+  const fmt = (n) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
+  const rows = items.map(i => `
+    <tr>
+      <td style="padding:8px 4px;border-bottom:1px solid #f0f0f0;color:#333">${i.nombre}</td>
+      <td style="padding:8px 4px;border-bottom:1px solid #f0f0f0;text-align:center;color:#666">x${i.quantity}</td>
+      <td style="padding:8px 4px;border-bottom:1px solid #f0f0f0;text-align:right;font-weight:600;color:#333">${fmt(i.precio * i.quantity)}</td>
+    </tr>
+  `).join('');
+  return `
+    <div style="background:white;border-radius:8px;padding:16px;margin:16px 0;border:1px solid #e0e0e0">
+      <h3 style="margin:0 0 12px;font-size:0.95rem;color:#5C2D91">Detalle de productos</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:0.85rem">
+        <thead>
+          <tr style="border-bottom:2px solid #e0e0e0">
+            <th style="padding:6px 4px;text-align:left;color:#767676;font-weight:600">Producto</th>
+            <th style="padding:6px 4px;text-align:center;color:#767676;font-weight:600">Cant.</th>
+            <th style="padding:6px 4px;text-align:right;color:#767676;font-weight:600">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
 // ── Endpoint: enviar email de confirmacion ────────────────────
 app.post('/api/send-email', async (req, res) => {
   console.log('📧 Peticion recibida en /api/send-email');
-  const { to_name, to_email, order_id, order_total, delivery_address, payment_method } = req.body;
+  const { to_name, to_email, order_id, order_total, delivery_address, payment_method, items } = req.body;
 
   if (!to_email) return res.status(400).json({ error: 'Email requerido' });
+
+  const itemsHtml = buildItemsTableHtml(items);
 
   console.log(`📤 Enviando email a: ${to_email}`);
   try {
@@ -49,10 +79,13 @@ app.post('/api/send-email', async (req, res) => {
 
           <!-- Cuerpo -->
           <div style="padding:28px;background:#f9f9f9">
-            <h2 style="color:#111;margin-top:0">¡Pedido confirmado! 🎉</h2>
+            <h2 style="color:#111;margin-top:0">¡Pedido confirmado!</h2>
             <p style="color:#444">Hola <strong>${to_name}</strong>, recibimos tu pedido y está en proceso.</p>
 
-            <!-- Detalle del pedido -->
+            <!-- Detalle de productos -->
+            ${itemsHtml}
+
+            <!-- Resumen del pedido -->
             <div style="background:white;border-radius:8px;padding:20px;margin:20px 0;border:1px solid #e0e0e0">
               <table style="width:100%;border-collapse:collapse;font-size:0.9rem">
                 <tr><td style="padding:6px 0;color:#767676">Número de orden</td><td style="padding:6px 0;text-align:right;font-weight:700">${order_id}</td></tr>
@@ -303,6 +336,11 @@ app.post('/api/webhook', async (req, res) => {
             const totalFmt = new Intl.NumberFormat('es-AR', {
               style: 'currency', currency: 'ARS', maximumFractionDigits: 0
             }).format((orderData.total || 0) + (orderData.shipping || 0));
+            const shippingFmt = (orderData.shipping || 0) === 0
+              ? '<span style="color:#00a650;font-weight:600">GRATIS</span>'
+              : new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(orderData.shipping);
+            const orderItems = Array.isArray(orderData.items) ? orderData.items : [];
+            const itemsHtml = buildItemsTableHtml(orderItems);
             try {
               await resend.emails.send({
                 from:    'onboarding@resend.dev',
@@ -315,13 +353,20 @@ app.post('/api/webhook', async (req, res) => {
                       <p style="color:rgba(255,255,255,0.8);margin:4px 0 0;font-size:0.9rem">Tu tienda de tecnología online</p>
                     </div>
                     <div style="padding:28px;background:#f9f9f9">
-                      <h2 style="color:#111;margin-top:0">¡Tu pago fue aprobado! 🎉</h2>
-                      <p style="color:#444">Hola <strong>${orderData.customer_name}</strong>, tu pago fue procesado correctamente y tu pedido está en camino.</p>
+                      <h2 style="color:#111;margin-top:0">¡Tu pago fue aprobado!</h2>
+                      <p style="color:#444">Hola <strong>${orderData.customer_name}</strong>, tu pago fue procesado correctamente y tu pedido está en preparación.</p>
+
+                      <!-- Detalle de productos -->
+                      ${itemsHtml}
+
+                      <!-- Resumen -->
                       <div style="background:white;border-radius:8px;padding:20px;margin:20px 0;border:1px solid #e0e0e0">
                         <table style="width:100%;border-collapse:collapse;font-size:0.9rem">
                           <tr><td style="padding:6px 0;color:#767676">Número de orden</td><td style="padding:6px 0;text-align:right;font-weight:700">${payment.external_reference}</td></tr>
-                          <tr><td style="padding:6px 0;color:#767676">Total pagado</td><td style="padding:6px 0;text-align:right;font-weight:700">${totalFmt}</td></tr>
+                          <tr><td style="padding:6px 0;color:#767676">Envío</td><td style="padding:6px 0;text-align:right">${shippingFmt}</td></tr>
+                          <tr style="border-top:2px solid #e0e0e0"><td style="padding:10px 0 6px;color:#111;font-weight:700;font-size:1rem">Total pagado</td><td style="padding:10px 0 6px;text-align:right;font-weight:700;font-size:1rem;color:#5C2D91">${totalFmt}</td></tr>
                           <tr><td style="padding:6px 0;color:#767676">Dirección de entrega</td><td style="padding:6px 0;text-align:right">${orderData.address}, ${orderData.city}</td></tr>
+                          <tr><td style="padding:6px 0;color:#767676">Método de pago</td><td style="padding:6px 0;text-align:right">MercadoPago</td></tr>
                           <tr><td style="padding:6px 0;color:#767676">Entrega estimada</td><td style="padding:6px 0;text-align:right">3-5 días hábiles</td></tr>
                         </table>
                       </div>

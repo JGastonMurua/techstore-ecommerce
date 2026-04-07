@@ -46,6 +46,7 @@ function Checkout() {
           order_total:      formatPrice(total + shipping),
           delivery_address: `${form.direccion}, ${form.ciudad}`,
           payment_method:   form.metodoPago,
+          items:            cartItems.map(i => ({ nombre: i.nombre, precio: i.precio, quantity: i.quantity })),
         })
       });
       clearTimeout(timeout);
