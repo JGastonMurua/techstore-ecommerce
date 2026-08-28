@@ -115,4 +115,4 @@ PORT=3001
 
 ---
 
-Desarrollado por [Gaston Murua](https://linkedin.com/in/jgastonmurua) — Talento Tech 2025
+Desarrollado por [Jorge Gastón Murúa](https://jorge-gaston-murua.gtresia.com/) — [portfolio](https://jorge-gaston-murua.gtresia.com/) · [LinkedIn](https://linkedin.com/in/jgastonmurua)
